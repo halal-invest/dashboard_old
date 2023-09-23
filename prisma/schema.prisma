@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          Int           @id @default(autoincrement())
+  title       String
+  slug        String        @unique
+  image       String
+  subcategory SubCategory[]
+}
+
+model SubCategory {
+  id         Int      @id @default(autoincrement())
+  title      String
+  slug       String   @unique
+  image      String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+}
+
+model Product {
+  id               Int     @id @default(autoincrement())
+  title            String
+  slug             String  @unique
+  sku              String
+  season           String
+  stock            String
+  price            String
+  originalPrice    String
+  colors           String
+  sizes            Size[]
+  images           String
+  shortDescription String
+  description      String
+  brand            String
+  subCategoryId    String
+  bestDeal         Boolean
+  discountedSale   Boolean
+}
+
+model Size {
+  id        Int      @id @default(autoincrement())
+  title     String
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId Int?
+}
