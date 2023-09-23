@@ -88,7 +88,7 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
                 <form onSubmit={saveHandler}>
                     <div>
                         <div className="field col-12">
-                           <UploadImage setValue={setImage} />
+                            <UploadImage setValue={setImage} />
                         </div>
 
                         <div className="field col-12">
@@ -101,8 +101,10 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
                             />
                         </div>
                     </div>
-
-                    <SubmitLoading isLoading={isLoading} value={[title, image]} />
+                    <SubmitLoading
+                        isLoading={isLoading}
+                        value={[title, image]}
+                    />
                 </form>
             </Dialog>
         </>

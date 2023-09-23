@@ -1,10 +1,10 @@
+"use client"
 import React from 'react';
 
-
-const DashboardPage = () => {
+const DashboardPage = async () => {
     return (
         <div>
-            <h2> Dashboard page</h2>
+            <h2> Dashboard main page   </h2>
         </div>
     );
 };

@@ -1,15 +1,14 @@
 "use client"
-
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { FileUpload } from 'primereact/fileupload';
 import axios from 'axios';
-
+import { Toast } from 'primereact/toast';
 
 
 export default function UploadImage({ setValue }: { setValue: any }) {
 
     const [file, setFile] = useState<any | null>(null);
-
+    const toast = useRef<Toast>(null);
 
     const handelUpload = async () => {
 
@@ -25,6 +24,11 @@ export default function UploadImage({ setValue }: { setValue: any }) {
             if (response?.status === 200) {
                 setValue(response?.data?.url)
                 setFile(null);
+                toast.current?.show({
+                    severity: 'info',
+                    summary: 'Info',
+                    detail: 'Image Upload successfully'
+                });
             }
 
         } catch (error) {
@@ -33,13 +37,13 @@ export default function UploadImage({ setValue }: { setValue: any }) {
 
     }
 
-
     const chooseOptions =
     {
         icon: 'pi pi-fw pi-images',
         iconOnly: true,
         className: 'custom-choose-btn p-button-rounded p-button-outlined px-3'
     };
+
     const uploadOptions = {
         icon: 'pi pi-fw pi-cloud-upload',
         iconOnly: true,
@@ -50,7 +54,8 @@ export default function UploadImage({ setValue }: { setValue: any }) {
     {
         icon: 'pi pi-fw pi-times',
         iconOnly: true,
-        className: 'custom-cancel-btn p-button-danger p-button-rounded p-button-outlined px-3'
+        className: 'custom-cancel-btn p-button-danger p-button-rounded p-button-outlined px-3',
+
     };
 
     const emptyTemplate = () => {
@@ -71,8 +76,11 @@ export default function UploadImage({ setValue }: { setValue: any }) {
     };
 
 
+
+
     return (
         <div className="" >
+            <Toast ref={toast} />
             <FileUpload
                 name="demo[]"
                 onSelect={(e) => setFile(e?.files[0])}
@@ -80,6 +88,7 @@ export default function UploadImage({ setValue }: { setValue: any }) {
                 uploadHandler={handelUpload}
                 onClear={() => setFile(null)}
                 accept="image/*"
+                onRemove={() => setFile(null)}
                 cancelOptions={cancelOptions}
                 chooseOptions={chooseOptions}
                 uploadOptions={uploadOptions}
