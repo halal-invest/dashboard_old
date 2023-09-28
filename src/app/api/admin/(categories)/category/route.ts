@@ -89,7 +89,13 @@ export const PATCH = async (req: Request) => {
             status: true
         });
 
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code == 'P2002') {
+            return NextResponse.json({
+                message: "Same title already exist. Try again",
+                status: false
+            });
+        }
         return NextResponse.json({
             message: "Something went wrong",
             status: true

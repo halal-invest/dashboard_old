@@ -12,6 +12,7 @@ import CategorySkeleton from '@/components/Skeleton/CategorySkeleton';
 import DeleteCategory from '@/components/(crud)/Category/DeleteCategory';
 import UpdateCategory from '@/components/(crud)/Category/UpdateCategory';
 import ShowSubCategory from '@/components/(crud)/Category/ShowSubCategory';
+import { Image } from 'primereact/image';
 
 
 const CategoriesPage = () => {
@@ -67,17 +68,15 @@ const CategoriesPage = () => {
     const imageBodyTemplate = (rowData: any) => {
         return (
             <>
-                {rowData?.image}
-            </>
-        );
-    };
-
-    const actionBodyTemplate = (rowData: ICategory) => {
-
-
-        return (
-            <>
-
+                <div className='flex justify-content-start'>
+                    <Image
+                        loading='lazy'
+                        src={rowData?.image}
+                        alt="Image"
+                        height='40'
+                        width="50"
+                        preview />
+                </div>
             </>
         );
     };
@@ -116,7 +115,7 @@ const CategoriesPage = () => {
                             >
                                 <Column
                                     selectionMode="multiple"
-                                    headerStyle={{ width: '10rem' }}
+                                    headerStyle={{ width: '5rem' }}
                                 />
                                 <Column
                                     field="id"
@@ -129,7 +128,7 @@ const CategoriesPage = () => {
                                     header="IMAGE"
                                     sortable
                                     body={imageBodyTemplate}
-                                    headerStyle={{ minWidth: "15rem" }}
+                                    headerStyle={{ minWidth: "5rem" }}
                                 />
 
                                 <Column
@@ -138,12 +137,6 @@ const CategoriesPage = () => {
                                     sortable
                                     body={titleBodyTemplate}
                                     headerStyle={{ minWidth: "15rem" }}
-                                />
-
-                                <Column
-                                    header="Action"
-                                    body={actionBodyTemplate}
-                                    headerStyle={{ minWidth: "10rem" }}
                                 />
 
                             </DataTable>

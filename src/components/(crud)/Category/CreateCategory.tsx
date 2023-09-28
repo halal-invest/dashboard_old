@@ -6,7 +6,9 @@ import axios from 'axios';
 import CustomInput from '@/components/Common/CustomInput';
 import SubmitLoading from '@/components/Common/SubmitLoading';
 import CreateModalButton from '@/components/Common/(Button)/CreateModalButton';
-import UploadImage from '@/components/Shared/UploadImage';
+import UploadSingleImage from '@/components/Shared/UploadSingleImage';
+import { Image } from 'primereact/image';
+import SingleImageRow from '@/components/Shared/SingleImageRow';
 
 
 const CreateCategory = ({ refetch }: { refetch: () => void }) => {
@@ -17,6 +19,9 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
 
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+
+    console.log(image);
 
     const toast = useRef<Toast>(null);
 
@@ -87,9 +92,14 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
             >
                 <form onSubmit={saveHandler}>
                     <div>
-                        <div className="field col-12">
-                            <UploadImage setValue={setImage} />
-                        </div>
+                        {
+                            image == "" ?
+                                <div className="field col-12">
+                                    <UploadSingleImage value={image} setValue={setImage} />
+                                </div>
+                                :
+                                <SingleImageRow setValue={setImage} url={image} />
+                        }
 
                         <div className="field col-12">
                             <CustomInput

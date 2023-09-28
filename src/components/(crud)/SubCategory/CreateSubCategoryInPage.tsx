@@ -9,6 +9,8 @@ import { ICategory } from '@/types/common';
 import CreateModalButton from '@/components/Common/(Button)/CreateModalButton';
 import { useQuery } from '@tanstack/react-query';
 import CustomDropDown from '@/components/Common/CustomDropDown';
+import UploadSingleImage from '@/components/Shared/UploadSingleImage';
+import SingleImageRow from '@/components/Shared/SingleImageRow';
 
 interface IProps {
     refetch: () => void
@@ -107,15 +109,14 @@ const CreateSubCategoryInPage = ({ refetch }: IProps) => {
             >
                 <form onSubmit={saveHandler}>
                     <div>
-                        <div className="field col-12">
-                            <CustomInput
-                                label="Image"
-                                value={image}
-                                focus={true}
-                                setValue={setImage}
-                                submitted={submitted}
-                            />
-                        </div>
+                        {
+                            image == "" ?
+                                <div className="field col-12">
+                                    <UploadSingleImage value={image} setValue={setImage} />
+                                </div>
+                                :
+                                <SingleImageRow setValue={setImage} url={image} />
+                        }
                         <div className="field col-12">
                             <CustomInput
                                 label="Title"

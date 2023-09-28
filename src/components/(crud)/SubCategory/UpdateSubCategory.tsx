@@ -7,6 +7,8 @@ import { ISubCategory } from '@/types/common';
 import CustomInput from '@/components/Common/CustomInput';
 import SubmitLoading from '@/components/Common/SubmitLoading';
 import UpdateModalButton from '@/components/Common/(Button)/UpdateModalButton';
+import UploadSingleImage from '@/components/Shared/UploadSingleImage';
+import SingleImageRow from '@/components/Shared/SingleImageRow';
 
 interface IProps {
     rowSelected: ISubCategory[]
@@ -100,21 +102,20 @@ const UpdateSubCategory = ({ rowSelected, refetch, setRowSelected }: IProps) => 
             >
                 <form onSubmit={updateHandler}>
                     <div>
+                        {
+                            image == "" ?
+                                <div className="field col-12">
+                                    <UploadSingleImage value={image} setValue={setImage} />
+                                </div>
+                                :
+                                <SingleImageRow setValue={setImage} url={image} />
+                        }
                         <div className="field col-12">
                             <CustomInput
                                 label="Title"
                                 value={title}
                                 focus={true}
                                 setValue={setTitle}
-                                submitted={submitted}
-                            />
-                        </div>
-
-                        <div className="field col-12">
-                            <CustomInput
-                                label="Image"
-                                value={image}
-                                setValue={setImage}
                                 submitted={submitted}
                             />
                         </div>

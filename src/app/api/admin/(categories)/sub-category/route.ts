@@ -84,7 +84,9 @@ export const POST = async (request: Request) => {
 export const PATCH = async (req: Request) => {
     const { id, title, image, categoryId }: IUpdate = await req.json();
 
+
     try {
+
         await prisma.subCategory.update({
             where: {
                 id
@@ -102,7 +104,15 @@ export const PATCH = async (req: Request) => {
             status: true
         });
 
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code == 'P2002') {
+            return NextResponse.json({
+                message: "Same title already exist. Try again",
+                status: false
+            });
+        }
+        
+
         return NextResponse.json({
             message: "Something went wrong",
             status: true

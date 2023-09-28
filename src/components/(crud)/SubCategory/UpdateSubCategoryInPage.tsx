@@ -9,6 +9,8 @@ import SubmitLoading from '@/components/Common/SubmitLoading';
 import UpdateModalButton from '@/components/Common/(Button)/UpdateModalButton';
 import CustomDropDown from '@/components/Common/CustomDropDown';
 import { useQuery } from '@tanstack/react-query';
+import UploadSingleImage from '@/components/Shared/UploadSingleImage';
+import SingleImageRow from '@/components/Shared/SingleImageRow';
 
 interface IProps {
     rowSelected: ISubCategory[]
@@ -26,7 +28,7 @@ const UpdateSubCategoryInPage = ({ rowSelected, refetch, setRowSelected }: IProp
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const toast = useRef<Toast>(null);
-    
+
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
@@ -99,28 +101,27 @@ const UpdateSubCategoryInPage = ({ rowSelected, refetch, setRowSelected }: IProp
             <Dialog
                 visible={dialog}
                 style={{ width: "400px" }}
-                header="Update Category"
+                header="Update Sub Category"
                 modal
                 className="p-fluid"
                 onHide={handleHide}
             >
                 <form onSubmit={updateHandler}>
                     <div>
+                        {
+                            image == "" ?
+                                <div className="field col-12">
+                                    <UploadSingleImage value={image} setValue={setImage} />
+                                </div>
+                                :
+                                <SingleImageRow setValue={setImage} url={image} />
+                        }
+
                         <div className="field col-12">
                             <CustomInput
                                 label="Title"
                                 value={title}
-                                focus={true}
                                 setValue={setTitle}
-                                submitted={submitted}
-                            />
-                        </div>
-
-                        <div className="field col-12">
-                            <CustomInput
-                                label="Image"
-                                value={image}
-                                setValue={setImage}
                                 submitted={submitted}
                             />
                         </div>

@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { Image } from 'primereact/image';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useRef, useState } from 'react';
 
@@ -74,10 +75,19 @@ const SubCategoryPage = ({ params }: IProps) => {
         );
     };
 
+
     const imageBodyTemplate = (rowData: ISubCategory) => {
         return (
             <>
-                {rowData?.image}
+                <div className='flex justify-content-start'>
+                    <Image
+                        loading='lazy'
+                        src={rowData?.image}
+                        alt="Image"
+                        height='40'
+                        width="50"
+                        preview />
+                </div>
             </>
         );
     };
@@ -121,7 +131,7 @@ const SubCategoryPage = ({ params }: IProps) => {
                                     field="id"
                                     header="CODE"
                                     sortable body={codeBodyTemplate}
-                                    headerStyle={{ minWidth: '3rem' }}
+                                    headerStyle={{ minWidth: '5rem' }}
                                 />
                                 <Column
                                     field="image"

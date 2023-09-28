@@ -1,5 +1,5 @@
 "use client"
-import UploadImage from '@/components/Shared/UploadImage';
+import UploadSingleImage from '@/components/Shared/UploadSingleImage';
 import React, { useState } from 'react';
 
 const BlogPage = () => {
@@ -7,7 +7,7 @@ const BlogPage = () => {
 
     return (
         <div>
-            <UploadImage setValue={setImage} />
+            <UploadSingleImage setValue={setImage} />
         </div>
     );
 };
