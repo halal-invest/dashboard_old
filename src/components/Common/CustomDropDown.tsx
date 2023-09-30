@@ -14,16 +14,16 @@ interface IProps {
     data: any
 }
 
-const CustomDropDown = ({ label, value, setValue, submitted, focus, optionSelected, data }: IProps) => {
+const CustomDropDown = ({ label, placeholder, value, setValue, submitted, focus, optionSelected, data }: IProps) => {
     return (
         <>
-            <label htmlFor="title"> {label} </label>
+            <label htmlFor={label}> {label} </label>
             <Dropdown
-                id="title"
+                id={label}
                 value={value}
                 optionLabel={optionSelected}
                 options={data?.data}
-                placeholder="Select a Category"
+                placeholder={placeholder}
                 autoFocus={focus}
                 onChange={(e) => setValue(e.value)}
                 required

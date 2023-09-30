@@ -36,8 +36,8 @@ model Product {
   colors           String
   sizes            Size[]
   images           String
-  shortDescription String
-  description      String
+  shortDescription String  @db.Text
+  description      String  @db.Text
   brand            String
   subCategoryId    String
   bestDeal         Boolean
@@ -49,4 +49,22 @@ model Size {
   title     String
   Product   Product? @relation(fields: [productId], references: [id])
   productId Int?
+}
+
+model SubBLog {
+  id    Int    @id @default(autoincrement())
+  title String
+  slug  String @unique
+  blog  Blog[]
+}
+
+model Blog {
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  image     String?
+  author    String
+  content   String   @db.Text
+  subBLog   SubBLog? @relation(fields: [subBLogId], references: [id])
+  subBLogId Int?
 }

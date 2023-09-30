@@ -18,3 +18,28 @@ export interface ISubCategory {
         image: string
     }
 }
+
+export interface ISubBlogs {
+    id: number;
+    title: string;
+    slug: string;
+}
+
+export interface IBlogs {
+    id: number;
+    title: string;
+    slug: string;
+    image: string;
+    author: string;
+    content: string;
+    subBLogId: number | null;
+}
+export interface IBlogsInclude {
+    id: number;
+    title: string;
+    slug: string;
+    image: string;
+    author: string;
+    content: string;
+    subBLog: ISubBlogs;
+}

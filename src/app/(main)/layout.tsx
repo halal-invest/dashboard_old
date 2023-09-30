@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Layout from '../../../layout/layout';
+// import Layout from '../../../layout/layout';
 
 
 interface AppLayoutProps {
@@ -7,15 +8,15 @@ interface AppLayoutProps {
 }
 
 export const metadata: Metadata = {
-    title: 'PrimeReact Sakai',
-    description: 'The ultimate collection of design-agnostic, flexible and accessible React UI Components.',
+    title: 'E-commerce',
+    description: "Shop the best deals online! Explore a wide range of products and enjoy secure, hassle-free shopping with fast delivery. Join us today!",
     robots: { index: false, follow: false },
     viewport: { initialScale: 1, width: 'device-width' },
     openGraph: {
         type: 'website',
-        title: 'PrimeReact SAKAI-REACT',
+        title: 'E-commerce',
         url: 'https://sakai.primereact.org/',
-        description: 'The ultimate collection of design-agnostic, flexible and accessible React UI Components.',
+        description: "Shop the best deals online! Explore a wide range of products and enjoy secure, hassle-free shopping with fast delivery. Join us today!",
         images: ['https://www.primefaces.org/static/social/sakai-react.png'],
         ttl: 604800
     },

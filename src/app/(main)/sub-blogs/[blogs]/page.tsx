@@ -5,25 +5,38 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useRef, useState } from 'react';
 import { IBlogsInclude } from '@/types/common';
 import TableHeader from '@/components/Common/TableHeader';
-import CategorySkeleton from '@/components/Skeleton/CategorySkeleton';
 import { Image } from 'primereact/image';
-import useBlogs from '@/hooks/useBlogs';
-import CreateBlog from '@/components/(crud)/(Blogs)/Blog/CreateBlog';
-import useSubBlogs from '@/hooks/useSubBlogs';
+import BlogSkeleton from '@/components/Skeleton/BlogSkeleton';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import CreateBlogInPage from '@/components/(crud)/(Blogs)/Blog/CreateBlogInPage';
 import DeleteBlog from '@/components/(crud)/(Blogs)/Blog/DeleteBlog';
 import UpdateBlog from '@/components/(crud)/(Blogs)/Blog/UpdateBlog';
-import BlogSkeleton from '@/components/Skeleton/BlogSkeleton';
 
 
-const BlogsPages = () => {
+interface IProps {
+    params: {
+        blogs: string,
+    }
+}
+
+const BlogsPages = ({ params }: IProps) => {
 
     const [selected, setSelected] = useState<IBlogsInclude[]>([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const dt = useRef(null);
 
 
-    const { data, isLoading, error, refetch } = useBlogs();
-    const { data: subBlogData } = useSubBlogs();
+    const { data: blogsData, isLoading, error, refetch } = useQuery({
+        queryKey: [`filter-blogs, ${params?.blogs}`],
+        queryFn: async () => await axios.get(`/api/admin/blogs/${params?.blogs}`)
+    });
+
+    const { data: subBlog, } = useQuery({
+        queryKey: [`${params?.blogs}`],
+        queryFn: async () => await axios.get(`/api/admin/sub-blogs/${params?.blogs}`)
+    });
+
 
     error && console.log(error);
 
@@ -40,7 +53,7 @@ const BlogsPages = () => {
                     refetch={refetch}
                     rowSelected={selected}
                     setRowSelected={setSelected}
-                    subBlogData={subBlogData}
+                    subBlogData={blogsData}
                 />
             </>
         );
@@ -49,9 +62,9 @@ const BlogsPages = () => {
     const rightToolbarTemplate = () => {
         return (
             <>
-                <CreateBlog
+                <CreateBlogInPage
+                    subBlog={subBlog?.data}
                     refetch={refetch}
-                    subBlogData={subBlogData}
                 />
             </>
         );
@@ -82,14 +95,6 @@ const BlogsPages = () => {
         );
     };
 
-    const subBlogBodyTemplate = (rowData: IBlogsInclude) => {
-        return (
-            <>
-                {rowData?.subBLog?.title}
-            </>
-        );
-    };
-
 
     return (
         <div className="grid crud-demo">
@@ -107,7 +112,7 @@ const BlogsPages = () => {
                             :
                             <DataTable
                                 ref={dt}
-                                value={data?.data}
+                                value={blogsData?.data}
                                 selection={selected}
                                 onSelectionChange={(e) => setSelected(e.value as any)}
                                 dataKey="id"
@@ -119,7 +124,7 @@ const BlogsPages = () => {
                                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} blogs"
                                 globalFilter={globalFilter}
                                 emptyMessage="No Blogs found."
-                                header={<TableHeader data={data?.data} setGlobalFilter={setGlobalFilter} title='blogs' />}
+                                header={<TableHeader data={blogsData?.data} setGlobalFilter={setGlobalFilter} title='blogs' />}
                                 responsiveLayout="scroll"
                             >
                                 <Column
@@ -140,14 +145,6 @@ const BlogsPages = () => {
                                     sortable
                                     body={titleBodyTemplate}
                                     headerStyle={{ minWidth: "20rem" }}
-                                />
-
-                                <Column
-                                    field="subBlog.title"
-                                    header="SUB-BLOGS"
-                                    sortable
-                                    body={subBlogBodyTemplate}
-                                    headerStyle={{ minWidth: "10rem" }}
                                 />
 
                             </DataTable>
