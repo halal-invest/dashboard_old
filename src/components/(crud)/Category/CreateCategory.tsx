@@ -21,8 +21,6 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
-    console.log(image);
-
     const toast = useRef<Toast>(null);
 
     const saveHandler = async (e: any) => {

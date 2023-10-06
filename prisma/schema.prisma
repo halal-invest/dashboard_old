@@ -68,3 +68,14 @@ model Blog {
   subBLog   SubBLog? @relation(fields: [subBLogId], references: [id])
   subBLogId Int?
 }
+
+model Coupon {
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  discount  Int
+  type      String
+  status    Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

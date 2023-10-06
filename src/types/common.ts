@@ -43,3 +43,14 @@ export interface IBlogsInclude {
     content: string;
     subBLog: ISubBlogs;
 }
+
+export interface ICouponType {
+    id: number;
+    title: string;
+    slug: string;
+    discount: number;
+    type: string;
+    status: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}

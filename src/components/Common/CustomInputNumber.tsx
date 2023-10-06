@@ -1,25 +1,25 @@
-import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber';
 import { classNames } from 'primereact/utils';
 import React from 'react';
 
 interface IProps {
     label: string,
-    value: string,
+    value: number,
     setValue: any,
     submitted: boolean,
     focus?: boolean;
     required?: boolean;
 }
 
-const CustomInput = ({ label, value, setValue, submitted, focus, required }: IProps) => {
+const CustomInputNumber = ({ label, value, setValue, submitted, focus, required }: IProps) => {
     return (
         <>
             <label htmlFor="title"> {label} </label>
-            <InputText
-                id="title"
+            <InputNumber
+                inputId="title"
                 value={value}
                 autoFocus={focus}
-                onChange={(e) => setValue(e.target.value)}
+                onValueChange={(e: any) => setValue(e.value)}
                 required={required}
                 className={classNames({
                     "p-invalid": submitted && !value,
@@ -37,4 +37,4 @@ const CustomInput = ({ label, value, setValue, submitted, focus, required }: IPr
     );
 };
 
-export default CustomInput;
+export default CustomInputNumber;

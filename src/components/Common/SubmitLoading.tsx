@@ -10,6 +10,7 @@ interface IProps {
 
 const SubmitLoading = ({ isLoading, value }: IProps) => {
 
+    
     return (
         <div style={{ marginTop: "30px" }}>
             {isLoading && (

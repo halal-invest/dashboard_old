@@ -13,6 +13,7 @@ import DeleteCategory from '@/components/(crud)/Category/DeleteCategory';
 import UpdateCategory from '@/components/(crud)/Category/UpdateCategory';
 import ShowSubCategory from '@/components/(crud)/Category/ShowSubCategory';
 import { Image } from 'primereact/image';
+import useCategories from '@/hooks/useCategories';
 
 
 const CategoriesPage = () => {
@@ -21,11 +22,7 @@ const CategoriesPage = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const dt = useRef(null);
 
-
-    const { data: categories, isLoading, error, refetch } = useQuery({
-        queryKey: ['categories'],
-        queryFn: async () => await axios.get("/api/admin/category")
-    });
+    const { data: categories, isLoading, error, refetch } = useCategories();
 
     error && console.log(error);
 

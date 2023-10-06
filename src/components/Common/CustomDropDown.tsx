@@ -11,10 +11,11 @@ interface IProps {
     focus?: boolean;
     placeholder: string;
     optionSelected: string;
-    data: any
+    data: any;
+    required?: boolean;
 }
 
-const CustomDropDown = ({ label, placeholder, value, setValue, submitted, focus, optionSelected, data }: IProps) => {
+const CustomDropDown = ({ label, placeholder, value, required, setValue, submitted, focus, optionSelected, data }: IProps) => {
     return (
         <>
             <label htmlFor={label}> {label} </label>
@@ -26,7 +27,7 @@ const CustomDropDown = ({ label, placeholder, value, setValue, submitted, focus,
                 placeholder={placeholder}
                 autoFocus={focus}
                 onChange={(e) => setValue(e.value)}
-                required
+                required={required}
                 className={classNames({
                     "p-invalid": submitted && !value,
                 })}
@@ -36,7 +37,7 @@ const CustomDropDown = ({ label, placeholder, value, setValue, submitted, focus,
                     style={{ fontSize: "1rem", color: "red" }}
                     className="p-invalid"
                 >
-                    {label} is required.
+                    {required && `${label} is required.`}
                 </small>
             )}
         </>
