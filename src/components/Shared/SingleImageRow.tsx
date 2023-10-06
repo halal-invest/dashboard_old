@@ -26,7 +26,7 @@ const SingleImageRow = ({ url, setValue }: IProps) => {
     const toast = useRef<Toast>(null);
 
     const regex = /\/v\d+\/([^/]+)\.\w{3,4}$/;
-    const match = url.match(regex);
+    const match = url?.match(regex);
     const publicId: any = match ? match[1] : null;
 
     const cloudName = 'sajibclaudinaryname';

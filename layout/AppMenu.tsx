@@ -37,9 +37,14 @@ const AppMenu = () => {
             items: [
 
                 {
+                    label: 'Site Info',
+                    icon: 'pi pi-fw pi-circle-off',
+                    to: '/siteinfo'
+                },
+                {
                     label: 'Banner',
                     icon: 'pi pi-fw pi-pencil',
-                    to: 'banner'
+                    to: '/banner'
                 },
                 {
                     label: 'Payment Methods',
@@ -54,13 +59,9 @@ const AppMenu = () => {
                 {
                     label: 'Coupon Banner',
                     icon: 'pi pi-fw pi-calendar',
-                    to: '/pages/timeline'
+                    to: '/coupon-banner'
                 },
-                {
-                    label: 'Site Info',
-                    icon: 'pi pi-fw pi-circle-off',
-                    to: '/pages/empty'
-                }
+
             ]
         },
 

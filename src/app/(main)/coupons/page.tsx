@@ -5,7 +5,6 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useRef, useState } from 'react';
 import { ICouponType } from '@/types/common';
 import TableHeader from '@/components/Common/TableHeader';
-import CategorySkeleton from '@/components/Skeleton/CategorySkeleton';
 import CreateCoupon from '@/components/(crud)/Coupon/CreateCoupon';
 import useCoupons from '@/hooks/useCoupons';
 import CouponSkeleton from '@/components/Skeleton/CouponSkeleton';

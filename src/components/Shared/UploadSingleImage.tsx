@@ -20,7 +20,7 @@ export default function UploadSingleImage({ setValue, value }: { setValue: any, 
 
         try {
 
-            if (value !== "") {
+            if (value !== "" ) {
                 return toast.current?.show({
                     severity: 'error',
                     detail: "Already added images",

@@ -5,6 +5,8 @@ import { classNames } from 'primereact/utils';
 import React, { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
 import { AppTopbarRef } from '../types/types';
 import { LayoutContext } from './context/layoutcontext';
+import useSiteInfo from '@/hooks/useSiteInfo';
+import { Avatar } from 'primereact/avatar';
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
@@ -12,18 +14,32 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const topbarmenuRef = useRef(null);
     const topbarmenubuttonRef = useRef(null);
 
+    const { data: siteInfo } = useSiteInfo();
+
     useImperativeHandle(ref, () => ({
         menubutton: menubuttonRef.current,
         topbarmenu: topbarmenuRef.current,
         topbarmenubutton: topbarmenubuttonRef.current
     }));
 
+
+
     return (
         <div className="layout-topbar">
-            <Link href="/" className="layout-topbar-logo">
-                <img src={`/layout/images/logo-${layoutConfig.colorScheme !== 'light' ? 'white' : 'dark'}.svg`} width="47.22px" height={'35px'} alt="logo" />
-                <span>SAKAI</span>
-            </Link>
+            {
+                siteInfo?.data
+                    ? <Link href="/" className="layout-topbar-logo">
+                        <img src={siteInfo?.data?.logo} width="50px" height={'35px'} alt="logo" className='mr-3' />
+                        <span>{siteInfo?.data?.title}</span>
+                    </Link>
+                    :
+                    <Avatar
+                        icon="pi pi-user"
+                        size="normal"
+                        shape="circle"
+                    />
+            }
+
 
             <button ref={menubuttonRef} type="button" className="p-link layout-menu-button layout-topbar-button" onClick={onMenuToggle}>
                 <i className="pi pi-bars" />

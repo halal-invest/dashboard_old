@@ -67,3 +67,13 @@ export interface IShippingType {
     cost: number;
     description: string;
 }
+
+export interface ISiteInfoType {
+    id: number;
+    logo: string | null;
+    title: string | null;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+    description: string | null;
+}

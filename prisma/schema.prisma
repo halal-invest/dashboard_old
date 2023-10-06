@@ -89,6 +89,16 @@ model PaymentMethod {
 model Shipping {
   id          Int    @id @default(autoincrement())
   title       String @unique
-  cost       Int
+  cost        Int
   description String
+}
+
+model SiteInfo {
+  id          Int     @id @default(autoincrement())
+  logo        String?
+  title       String? @unique
+  email       String? @unique
+  phone       String?
+  address     String?
+  description String?
 }
