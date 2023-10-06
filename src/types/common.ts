@@ -54,3 +54,9 @@ export interface ICouponType {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface IPaymentMethodType {
+    id: number;
+    title: string;
+    description: string;
+}
