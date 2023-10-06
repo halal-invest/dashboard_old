@@ -42,14 +42,19 @@ const AppMenu = () => {
                     to: 'banner'
                 },
                 {
-                    label: 'Coupon Banner',
-                    icon: 'pi pi-fw pi-calendar',
-                    to: '/pages/timeline'
+                    label: 'Payment Methods',
+                    icon: 'pi pi-fw pi-pencil',
+                    to: '/payment-method'
                 },
                 {
                     label: 'Shipping',
-                    icon: 'Payment Methods',
-                    to: '/pages/notfound'
+                    icon: 'pi pi-fw pi-pencil',
+                    to: '/shipping'
+                },
+                {
+                    label: 'Coupon Banner',
+                    icon: 'pi pi-fw pi-calendar',
+                    to: '/pages/timeline'
                 },
                 {
                     label: 'Site Info',

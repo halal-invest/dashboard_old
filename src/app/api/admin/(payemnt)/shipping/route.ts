@@ -1,10 +1,11 @@
-import { IPaymentMethodType } from "@/types/common";
+import { IShippingType } from "@/types/common";
 import prisma from "@/utils/connect";
 import { NextResponse } from "next/server";
 
 
 interface IRequest {
     title: string;
+    cost: number;
     description: string;
 }
 
@@ -15,8 +16,8 @@ interface IPatch extends IRequest {
 
 export const GET = async (request: Request) => {
     try {
-        const paymentMethods: IPaymentMethodType[] = await prisma.paymentMethod.findMany();
-        return NextResponse.json(paymentMethods);
+        const shippings: IShippingType[] = await prisma.shipping.findMany();
+        return NextResponse.json(shippings);
     } catch (error) {
         return NextResponse.json({
             status: false,
@@ -28,10 +29,10 @@ export const GET = async (request: Request) => {
 
 export const POST = async (request: Request) => {
 
-    const { title, description }: IRequest = await request.json();
+    const { title, cost, description }: IRequest = await request.json();
 
     try {
-        const exist: IPaymentMethodType | null = await prisma.paymentMethod.findFirst({
+        const exist: IShippingType | null = await prisma.shipping.findUnique({
             where: { title }
         });
 
@@ -42,16 +43,17 @@ export const POST = async (request: Request) => {
             })
         }
         else {
-            await prisma.paymentMethod.create({
+            await prisma.shipping.create({
                 data: {
                     title,
+                    cost,
                     description,
                 }
             });
 
             return NextResponse.json({
                 status: true,
-                message: `Payment Method ${title} has been created successfully`
+                message: `Shipping ${title} has been created successfully`
             });
         };
 
@@ -62,28 +64,37 @@ export const POST = async (request: Request) => {
             message: 'Something went wrong !'
         });
     }
-}
+};
 
 export const PATCH = async (req: Request) => {
-    const { id, title, description }: IPatch = await req.json();
+    const { id, title, cost, description }: IPatch = await req.json();
 
     try {
-        await prisma.paymentMethod.update({
+        await prisma.shipping.update({
             where: {
                 id
             },
             data: {
                 title,
+                cost,
                 description
             }
         });
 
         return NextResponse.json({
-            message: `Payment Method ${title} has been update successfully`,
+            message: `Shipping ${title} has been update successfully`,
             status: true
         });
 
     } catch (error: any) {
+
+        if (error.code = 'P2002') {
+            return NextResponse.json({
+                message: "Title already exist",
+                status: false
+            });
+        }
+
         return NextResponse.json({
             message: "Something went wrong",
             status: false
@@ -98,7 +109,7 @@ export const DELETE = async (req: Request) => {
     try {
 
         if (id.length > 1) {
-            await prisma.paymentMethod.deleteMany({
+            await prisma.shipping.deleteMany({
                 where: {
                     id: {
                         in: id,
@@ -106,18 +117,18 @@ export const DELETE = async (req: Request) => {
                 }
             })
             return NextResponse.json({
-                message: "Payment Methods Delete has been successfully",
+                message: "Shippings Delete has been successfully",
                 status: true
             });
         }
         else {
-            await prisma.paymentMethod.delete({
+            await prisma.shipping.delete({
                 where: {
                     id: id[0],
                 }
             })
             return NextResponse.json({
-                message: "Payment Method Delete has been successfully",
+                message: "Shipping Delete has been successfully",
                 status: true
             });
         }

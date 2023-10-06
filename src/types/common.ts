@@ -60,3 +60,10 @@ export interface IPaymentMethodType {
     title: string;
     description: string;
 }
+
+export interface IShippingType {
+    id: number;
+    title: string;
+    cost: number;
+    description: string;
+}

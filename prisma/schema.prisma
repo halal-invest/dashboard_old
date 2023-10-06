@@ -85,3 +85,10 @@ model PaymentMethod {
   title       String @unique
   description String
 }
+
+model Shipping {
+  id          Int    @id @default(autoincrement())
+  title       String @unique
+  cost       Int
+  description String
+}
