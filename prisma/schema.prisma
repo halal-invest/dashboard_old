@@ -102,3 +102,9 @@ model SiteInfo {
   address     String?
   description String?
 }
+
+model Slider {
+  id          Int     @id @default(autoincrement())
+  image       String
+  description String?
+}

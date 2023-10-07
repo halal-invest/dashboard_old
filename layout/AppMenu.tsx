@@ -42,9 +42,14 @@ const AppMenu = () => {
                     to: '/siteinfo'
                 },
                 {
-                    label: 'Banner',
+                    label: 'Slider',
                     icon: 'pi pi-fw pi-pencil',
-                    to: '/banner'
+                    to: '/slider'
+                },
+                {
+                    label: 'Home Banner',
+                    icon: 'pi pi-fw pi-pencil',
+                    to: '/home-banner'
                 },
                 {
                     label: 'Payment Methods',

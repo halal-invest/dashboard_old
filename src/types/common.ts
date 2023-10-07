@@ -77,3 +77,9 @@ export interface ISiteInfoType {
     address: string | null;
     description: string | null;
 }
+
+export interface ISliderType {
+    id: number;
+    image: string;
+    description: string | null;
+}
