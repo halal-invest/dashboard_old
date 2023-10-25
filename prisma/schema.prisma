@@ -68,3 +68,60 @@ model Blog {
   subBLog   SubBLog? @relation(fields: [subBLogId], references: [id])
   subBLogId Int?
 }
+
+//authentication
+model Permission {
+  id          Int      @id @unique @default(autoincrement())
+  title       String   @unique
+  description String?
+  roles       Role[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Role {
+  id          Int          @id @unique @default(autoincrement())
+  title       String       @unique
+  description String
+  permissions Permission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  Profile     Profile?     @relation(fields: [profileId], references: [id])
+  profileId   Int?
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String?  @unique
+  password  String?
+  verified  Boolean  @default(false)
+  profile   Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OtpUser {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  profile   Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profile {
+  id          Int      @id @default(autoincrement())
+  userId      Int?     @unique
+  user        User?    @relation(fields: [userId], references: [id])
+  otpUserId   Int?     @unique
+  optUser     OtpUser? @relation(fields: [otpUserId], references: [id])
+  name        String?
+  email       String?
+  phone       String?
+  roles       Role[]
+  address     String?
+  city        String?  @default("Dhaka")
+  country     String?  @default("Bangladesh")
+  postal_code String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

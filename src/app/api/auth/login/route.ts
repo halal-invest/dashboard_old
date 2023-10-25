@@ -8,43 +8,33 @@ const MAX_AGE = 60 * 60 * 24 *30;
 export const POST = async (request: Request) => {
     const { email, password } = await request.json();
     try {
-        const existUser = await prisma.user.findUnique({
+        const existUser:any = await prisma.user.findUnique({
             where: { email },
             select: {
-                username: true,
                 password: true,
                 email:true,
-                roles: {
-                    select: {
-                        permissions: {
-                            select: {
-                                title: true
-                            }
-                        }
-                    }
-                }
             }
         });
 
-        const uniquePermissionsSet = new Set();
+        // const uniquePermissionsSet = new Set();
 
-        existUser?.roles?.forEach((role) => {
-            role.permissions.forEach((permission) => {
-                uniquePermissionsSet.add(permission.title);
-            });
-        });
+        // existUser?.roles?.forEach((role) => {
+        //     role.permissions.forEach((permission) => {
+        //         uniquePermissionsSet.add(permission.title);
+        //     });
+        // });
         // const roles = existUser?.roles?.map((r)=>r.title);
-        const uniquePermissionsArray = Array.from(uniquePermissionsSet);
+        // const uniquePermissionsArray = Array.from(uniquePermissionsSet);
 
         // console.log("Unique Permissions:", uniquePermissionsArray);
 
         if (!existUser) {
             return NextResponse.json({ message: 'No user found with this email.', status: false });
         }
-        const passwordMatch = await compare(password, existUser.password);
+        const passwordMatch = await compare(password, existUser?.password);
         if (passwordMatch) {
             // const secret = process.env.JWT_SECRET;
-            const token = jwt.sign({ email, uniquePermissionsArray }, JWT_SECRET, { expiresIn: MAX_AGE });
+            const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: MAX_AGE });
 
             const serialized = serialize('jwt', token, {
                 httpOnly: true,
@@ -53,11 +43,12 @@ export const POST = async (request: Request) => {
                 path: '/',
                 maxAge: MAX_AGE
             });
-            const userInfo = {
-                name: existUser.username,
-                email:existUser.email,
-            }
-            return new Response(JSON.stringify({ user: userInfo, message: 'Authenticated', status: true }), {
+            const userProfile = await prisma.profile.findFirst({
+                where: {id: existUser?.id}
+            })
+            console.log(userProfile);
+           
+            return new Response(JSON.stringify({ user: userProfile, message: 'Authenticated', status: true }), {
                 headers: { 'Set-Cookie': serialized },
                 status: 200
             });

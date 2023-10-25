@@ -14,7 +14,7 @@ type TokenData = {
 
 export const POST = async (request: Request) => {
     const { email, token } = await request.json();
-    let emailFromEmail = '';
+    let emailFromToken = '';
     try {
         if (token) {
             const verified = verify(token, JWT_JOIN_SECRET);
@@ -22,9 +22,8 @@ export const POST = async (request: Request) => {
             const decodedToken = decode(token);
             if (decodedToken && typeof decodedToken === 'object' && 'email' in decodedToken) {
                 const tokenData: TokenData = decodedToken as TokenData;
-                emailFromEmail = tokenData?.email;
-                // console.log(tokenData?.roles);
-                if (email !== emailFromEmail) {
+                emailFromToken = tokenData?.email;
+                if (email !== emailFromToken) {
                     return NextResponse.json({ message: 'Invitation sent with a different email address.', status: false });
                 }
                 const existUser = await prisma.user.findUnique({
@@ -33,14 +32,40 @@ export const POST = async (request: Request) => {
                 if (!existUser) {
                     return NextResponse.json({ message: 'This email is not registered yet. Please register first.', status: false });
                 }
+                
                 const verifyUser = await prisma.user.update({
                     where: {
                         email: email
                     },
                     data: {
                         verified: true
+                    },
+                    select: {
+                        id:true
                     }
                 });
+                if(verifyUser){
+                    let customerRole = await prisma.role.findFirst({
+                        where: {
+                            title: 'customer'
+                        },
+                        select: {
+                            id: true
+                        }
+                    });
+                    const userProfile = await prisma.profile.create({
+                    data:{
+                        email: email,
+                        user: {
+                            connect:{id:verifyUser?.id}
+                        },
+                        roles: {
+                            connect: [{ id: customerRole?.id }]
+                        }
+                        
+                    }
+                })
+            }
                 if (!verifyUser) {
                     return NextResponse.json({ message: 'Verification Failed. Something went wrong.', status: false });
                 }

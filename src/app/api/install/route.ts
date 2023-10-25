@@ -4,7 +4,7 @@ import { hash } from 'bcrypt';
 
 export const GET = async (request: NextRequest) => {
     try {
-        const userCount = await prisma.user.count({
+        const adminCount = await prisma.profile.count({
             where: {
                 roles: {
                     some: {
@@ -13,7 +13,7 @@ export const GET = async (request: NextRequest) => {
                 }
             }
         });
-        return NextResponse.json({ userCount, status: true });
+        return NextResponse.json({ adminCount, status: true });
 
     } catch (error) {
         return NextResponse.json({ message: error, status: false });
@@ -23,7 +23,7 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
     const { email, password } = await request.json();
     try {
-        const userCount = await prisma.user.count({
+        const adminCount = await prisma.profile.count({
             where: {
                 roles: {
                     some: {
@@ -32,7 +32,7 @@ export const POST = async (request: NextRequest) => {
                 }
             }
         });
-        if(userCount >=1 ){
+        if(adminCount >=1 ){
         return NextResponse.json({ message: "Admin already exists.Please login", status: 500 });
 
         }
@@ -70,19 +70,33 @@ export const POST = async (request: NextRequest) => {
         })
 
             const hashedPassword = await hash(password, 10);
-            await prisma.user.create({
+            const adminUser = await prisma.user.create({
                 data: {
                     email,
                     password: hashedPassword,
-                    roles: {
-                        connect: [{id:adminRole.id}]
-                    },
+                    // roles: {
+                    //     connect: [{id:adminRole.id}]
+                    // },
                     verified:true
                 },
-                include: {
-                    roles: true
+                select:{
+                    id:true
                 }
+                // include: {
+                //     roles: true
+                // }
             });
+            await prisma.profile.create({
+                data: {
+                    name:"Admin",
+                    user:{
+                        connect: {id:adminUser?.id}
+                    },
+                    roles:{
+                        connect: {id:adminRole?.id}
+                    }
+                }
+            })
         return NextResponse.json({ message: 'Admin created successfully', status: true });
     } catch (error) {
         return NextResponse.json({ message: error, status: 500 });
