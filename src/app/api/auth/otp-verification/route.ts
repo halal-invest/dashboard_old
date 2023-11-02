@@ -4,7 +4,7 @@ import jwt, { decode, verify } from 'jsonwebtoken';
 import { serialize } from 'cookie';
 import { JWT_JOIN_SECRET, JWT_SECRET } from '../../../../utils/constants';
 const MAX_AGE = 60 * 60 * 24 *30;
-
+import { cookies } from 'next/headers'
 type TokenData = {
     phone: string;
     randomNumber: string;
@@ -66,7 +66,13 @@ export const POST = async (request: Request) => {
                         }
                     })
                 }
-
+                
+                cookies().set({
+                    name: 'phone',
+                    value: phone,
+                    httpOnly: true,
+                    path: '/',
+                  })
                 const token = jwt.sign({ phone }, JWT_SECRET, { expiresIn: MAX_AGE });
 
                 const serialized = serialize('jwt', token, {

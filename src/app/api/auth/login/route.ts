@@ -4,6 +4,7 @@ import { compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 import { JWT_SECRET } from '../../../../utils/constants';
+import { cookies } from 'next/headers'
 const MAX_AGE = 60 * 60 * 24 * 30;
 export const POST = async (request: Request) => {
     const { email, password } = await request.json();
@@ -21,6 +22,12 @@ export const POST = async (request: Request) => {
         }
         const passwordMatch = await compare(password, existUser?.password);
         if (passwordMatch) {
+            cookies().set({
+                name: 'email',
+                value: email,
+                httpOnly: true,
+                path: '/',
+              })
             const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: MAX_AGE });
 
             const serialized = serialize('jwt', token, {
