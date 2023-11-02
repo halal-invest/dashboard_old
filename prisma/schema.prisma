@@ -86,8 +86,7 @@ model Role {
   permissions Permission[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  Profile     Profile?     @relation(fields: [profileId], references: [id])
-  profileId   Int?
+  profiles    Profile[]
 }
 
 model User {
@@ -102,7 +101,7 @@ model User {
 
 model OtpUser {
   id        Int      @id @default(autoincrement())
-  phone     String
+  phone     String   @unique
   profile   Profile?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
