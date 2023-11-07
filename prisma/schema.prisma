@@ -16,40 +16,85 @@ model Category {
 }
 
 model SubCategory {
-  id         Int      @id @default(autoincrement())
-  title      String
-  slug       String   @unique
-  image      String
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId Int
+  id             Int             @id @default(autoincrement())
+  title          String
+  slug           String          @unique
+  image          String
+  category       Category        @relation(fields: [categoryId], references: [id])
+  categoryId     Int             @unique
+  subSubCategory SubSubCategory?
+}
+
+model SubSubCategory {
+  id            Int         @id @default(autoincrement())
+  title         String
+  slug          String      @unique
+  image         String
+  subCategoryId Int         @unique
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
+  Product       Product[]
 }
 
 model Product {
-  id               Int     @id @default(autoincrement())
+  id               Int            @id @default(autoincrement())
   title            String
-  slug             String  @unique
-  sku              String
+  slug             String         @unique
+  sku              String         @unique
   season           String
   stock            String
   price            String
   originalPrice    String
-  colors           String
-  sizes            Size[]
-  images           String
-  shortDescription String  @db.Text
-  description      String  @db.Text
+  images           Media[]
+  shortDescription String         @db.Text
+  description      String         @db.Text
   brand            String
-  subCategoryId    String
   bestDeal         Boolean
   discountedSale   Boolean
+  subSubCategoryId Int
+  subSubCategory   SubSubCategory @relation(fields: [subSubCategoryId], references: [id])
+  Prices           Prices[]
+  ColorProduct     ColorProduct[]
+  Order            Order[]
 }
 
-model Size {
+model Media {
   id        Int      @id @default(autoincrement())
   title     String
+  image     String
   Product   Product? @relation(fields: [productId], references: [id])
   productId Int?
 }
+
+model Size {
+  id     Int      @id @default(autoincrement())
+  title  String
+  Prices Prices[]
+}
+
+model Prices {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  sizeId    Int
+  size      Size    @relation(fields: [sizeId], references: [id])
+  price     String
+}
+
+model Color {
+  id           Int            @id @default(autoincrement())
+  title        String
+  colorCode    String
+  ColorProduct ColorProduct[]
+}
+
+model ColorProduct {
+  id        Int     @id @default(autoincrement())
+  colorId   Int
+  color     Color   @relation(fields: [colorId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+}
+
 
 model SubBLog {
   id    Int    @id @default(autoincrement())
@@ -123,4 +168,5 @@ model Profile {
   postal_code String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  Order       Order[]
 }
