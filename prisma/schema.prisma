@@ -13,6 +13,8 @@ model Category {
   slug        String        @unique
   image       String
   subcategory SubCategory[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model SubCategory {
@@ -23,6 +25,8 @@ model SubCategory {
   category       Category        @relation(fields: [categoryId], references: [id])
   categoryId     Int             @unique
   subSubCategory SubSubCategory?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model SubSubCategory {
@@ -33,6 +37,8 @@ model SubSubCategory {
   subCategoryId Int         @unique
   subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
   Product       Product[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Product {
@@ -40,67 +46,112 @@ model Product {
   title            String
   slug             String         @unique
   sku              String         @unique
-  season           String
-  stock            String
-  price            String
-  originalPrice    String
-  images           Media[]
-  shortDescription String         @db.Text
-  description      String         @db.Text
-  brand            String
-  bestDeal         Boolean
-  discountedSale   Boolean
+  season           String?
   subSubCategoryId Int
   subSubCategory   SubSubCategory @relation(fields: [subSubCategoryId], references: [id])
-  Prices           Prices[]
-  ColorProduct     ColorProduct[]
-  Order            Order[]
+  sizeProducts     SizeProduct[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }
 
 model Media {
-  id        Int      @id @default(autoincrement())
-  title     String
-  image     String
-  Product   Product? @relation(fields: [productId], references: [id])
-  productId Int?
+  id            Int          @id @default(autoincrement())
+  title         String
+  image         String
+  sizeProduct   SizeProduct? @relation(fields: [sizeProductId], references: [id])
+  sizeProductId Int?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model Size {
-  id     Int      @id @default(autoincrement())
-  title  String
-  Prices Prices[]
+  id           Int           @id @default(autoincrement())
+  title        String
+  sizeProducts SizeProduct[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
-model Prices {
-  id        Int     @id @default(autoincrement())
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-  sizeId    Int
-  size      Size    @relation(fields: [sizeId], references: [id])
-  price     String
+model SizeProduct {
+  id               Int      @id @default(autoincrement())
+  productId        Int
+  product          Product  @relation(fields: [productId], references: [id])
+  sizeId           Int
+  size             Size     @relation(fields: [sizeId], references: [id])
+  stock            String?
+  price            String?
+  originalPrice    String?
+  images           Media[]
+  shortDescription String   @db.Text
+  description      String?  @db.Text
+  bestDeal         Boolean
+  discountedSale   Boolean
+  colors           Color[]
+  orders           Order[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Color {
-  id           Int            @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   title        String
   colorCode    String
-  ColorProduct ColorProduct[]
+  sizeProducts SizeProduct[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
-model ColorProduct {
-  id        Int     @id @default(autoincrement())
-  colorId   Int
-  color     Color   @relation(fields: [colorId], references: [id])
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
+model Order {
+  id           Int           @id @default(autoincrement())
+  name         String?
+  email        String?
+  phone        String?
+  address      String?
+  city         String?       @default("Dhaka")
+  country      String?       @default("Bangladesh")
+  postal_code  String?
+  sizeProducts SizeProduct[]
+  Profile      Profile?      @relation(fields: [profileId], references: [id])
+  profileId    Int?
+  total        String
+  subTotal     String
+
+  paymentMethods     PaymentMethods? @relation(fields: [paymentMethodsId], references: [id])
+  paymentMethodsId   Int?
+  transactionPhoneNo String
+  transactionNo      String
+
+  deliveryCostId Int
+  deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
+model PaymentMethods {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DeliveryCost {
+  id        Int      @id @default(autoincrement())
+  areaName  String
+  cost      String
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 model SubBLog {
-  id    Int    @id @default(autoincrement())
-  title String
-  slug  String @unique
-  blog  Blog[]
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  blogs     Blog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Blog {
@@ -110,8 +161,10 @@ model Blog {
   image     String?
   author    String
   content   String   @db.Text
-  subBLog   SubBLog? @relation(fields: [subBLogId], references: [id])
-  subBLogId Int?
+  subBlog   SubBLog? @relation(fields: [subBlogId], references: [id])
+  subBlogId Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 //authentication
@@ -129,9 +182,9 @@ model Role {
   title       String       @unique
   description String
   permissions Permission[]
+  profiles    Profile[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  profiles    Profile[]
 }
 
 model User {
@@ -166,7 +219,7 @@ model Profile {
   city        String?  @default("Dhaka")
   country     String?  @default("Bangladesh")
   postal_code String?
+  orders      Order[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  Order       Order[]
 }
