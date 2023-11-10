@@ -113,21 +113,24 @@ model Order {
   sizeProducts SizeProduct[]
   Profile      Profile?      @relation(fields: [profileId], references: [id])
   profileId    Int?
-  total        String
   subTotal     String
+  total        String
 
-  paymentMethods     PaymentMethods? @relation(fields: [paymentMethodsId], references: [id])
+  paymentMethods     PaymentMethod? @relation(fields: [paymentMethodsId], references: [id])
   paymentMethodsId   Int?
-  transactionPhoneNo String
-  transactionNo      String
+  transactionPhoneNo String?
+  transactionNo      String?
 
   deliveryCostId Int
   deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  paymentStatus  String       @default("unpaid") //unpaid, paid
+  orderStatus    String       @default("pending") //pending, received, ready_to_ship, delivered, cancelled
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model PaymentMethods {
+model PaymentMethod {
   id          Int      @id @default(autoincrement())
   title       String
   description String
@@ -144,6 +147,8 @@ model DeliveryCost {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+//blog section
 
 model SubBLog {
   id        Int      @id @default(autoincrement())
@@ -204,6 +209,7 @@ model OtpUser {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 
 model Profile {
   id          Int      @id @default(autoincrement())
