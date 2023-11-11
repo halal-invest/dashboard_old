@@ -18,15 +18,16 @@ model Category {
 }
 
 model SubCategory {
-  id             Int             @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   title          String
-  slug           String          @unique
+  slug           String           @unique
   image          String
-  category       Category        @relation(fields: [categoryId], references: [id])
-  categoryId     Int             @unique
-  subSubCategory SubSubCategory?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  category       Category         @relation(fields: [categoryId], references: [id])
+  categoryId     Int              @unique
+  subSubCategory SubSubCategory[]
+  products       Product[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 model SubSubCategory {
@@ -36,22 +37,24 @@ model SubSubCategory {
   image         String
   subCategoryId Int         @unique
   subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
-  Product       Product[]
+  products      Product[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
 
 model Product {
-  id               Int            @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   title            String
-  slug             String         @unique
-  sku              String         @unique
+  slug             String          @unique
+  sku              String          @unique
   season           String?
-  subSubCategoryId Int
-  subSubCategory   SubSubCategory @relation(fields: [subSubCategoryId], references: [id])
+  subSubCategoryId Int?
+  subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
   sizeProducts     SizeProduct[]
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
+  subCategoryId    Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model Media {
@@ -209,7 +212,6 @@ model OtpUser {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
 
 model Profile {
   id          Int      @id @default(autoincrement())
