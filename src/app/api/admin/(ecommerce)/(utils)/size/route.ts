@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from 'next/server';
 interface Size {
     id: number;
     title: string;
-    sizeCode: string;
 }
 
 export const GET = async (request: NextRequest) => {
@@ -28,7 +27,7 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-    let { title, sizeCode }: Size = await request.json();
+    let { title }: Size = await request.json();
     const requiredPermission = 'sizes';
 
     if (await checkPermission(request, requiredPermission)) {
@@ -45,8 +44,7 @@ export const POST = async (request: NextRequest) => {
             } else {
                 await prisma.size.create({
                     data: {
-                        title,
-                        sizeCode
+                        title
                     }
                 });
 
@@ -68,7 +66,7 @@ export const POST = async (request: NextRequest) => {
 };
 
 export const PATCH = async (request: NextRequest) => {
-    let { id, title, sizeCode }: Size = await request.json();
+    let { id, title }: Size = await request.json();
     const requiredPermission = 'sizes';
 
     if (await checkPermission(request, requiredPermission)) {
@@ -78,8 +76,7 @@ export const PATCH = async (request: NextRequest) => {
                     id
                 },
                 data: {
-                    title,
-                    sizeCode
+                    title
                 }
             });
 
