@@ -11,7 +11,7 @@ model Category {
   id          Int           @id @default(autoincrement())
   title       String
   slug        String        @unique
-  image       String
+  image       Media?
   subcategory SubCategory[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -21,7 +21,7 @@ model SubCategory {
   id             Int              @id @default(autoincrement())
   title          String
   slug           String           @unique
-  image          String
+  image          Media?
   category       Category         @relation(fields: [categoryId], references: [id])
   categoryId     Int              @unique
   subSubCategory SubSubCategory[]
@@ -34,7 +34,7 @@ model SubSubCategory {
   id            Int         @id @default(autoincrement())
   title         String
   slug          String      @unique
-  image         String
+  image         Media?
   subCategoryId Int         @unique
   subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
   products      Product[]
@@ -58,13 +58,19 @@ model Product {
 }
 
 model Media {
-  id            Int          @id @default(autoincrement())
-  title         String
-  image         String
-  sizeProduct   SizeProduct? @relation(fields: [sizeProductId], references: [id])
-  sizeProductId Int?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id               Int             @id @default(autoincrement())
+  title            String
+  url              String
+  sizeProductId    Int?
+  sizeProduct      SizeProduct?    @relation(fields: [sizeProductId], references: [id])
+  categoryId       Int?            @unique
+  category         Category?       @relation(fields: [categoryId], references: [id])
+  subCategoryId    Int?            @unique
+  subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
+  subSubCategoryId Int?            @unique
+  subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model Size {

@@ -1,125 +1,149 @@
 import { checkPermission } from '@/utils/checkPermissions';
 import prisma from '@/utils/connect';
+import { connect } from 'http2';
 import { NextRequest, NextResponse } from 'next/server';
 import slugify from 'slugify';
 
-interface ICategory extends IRequest {
+interface Category {
     id: number;
-    slug: string;
-}
-
-interface IUpdate extends IRequest {
-    id: number;
-}
-
-interface IRequest {
     title: string;
-    image: string;
     slug: string;
+    image?: { id: number; title: string; url: string; sizeProductId: number | null; categoryId: number | null; subCategoryId: number | null; subSubCategoryId: number | null; createdAt: Date; updatedAt: Date } | null | undefined;
+    media?: string;
 }
 
 export const GET = async (request: NextRequest) => {
     const requiredPermission = 'categories';
 
-    if (await checkPermission(request, requiredPermission)) {
-        try {
-            const categories: ICategory[] = await prisma.category.findMany();
-            return NextResponse.json(categories);
-        } catch (error) {
-            return NextResponse.json({
-                status: false,
-                error,
-                message: 'Something went wrong !'
-            });
-        }
-    } else {
-        return NextResponse.json(null, { status: 200 });
+    // if (await checkPermission(request, requiredPermission)) {
+    try {
+        const categories: Category[] = await prisma.category.findMany({
+            include: {
+                image: true
+            }
+        });
+        return NextResponse.json(categories);
+    } catch (error) {
+        return NextResponse.json({
+            status: false,
+            error,
+            message: 'Something went wrong !'
+        });
     }
+    // } else {
+    //     return NextResponse.json(null, { status: 200 });
+    // }
 };
 
 export const POST = async (request: NextRequest) => {
-    let { title, slug, image }: IRequest = await request.json();
+    let { title, slug, media }: Category = await request.json();
     const requiredPermission = 'categories';
 
-    if (await checkPermission(request, requiredPermission)) {
-        try {
-            const exist: ICategory | null = await prisma.category.findFirst({
-                where: { title }
-            });
+    // if (await checkPermission(request, requiredPermission)) {
+    try {
+        const exist: Category | null = await prisma.category.findFirst({
+            where: { title }
+        });
 
-            if (exist) {
-                return NextResponse.json({
-                    status: false,
-                    message: `${title} already exist. Try again!`
-                });
-            } else {
-                if (slug === null || slug === '') {
-                    slug = slugify(title);
-                }
-                await prisma.category.create({
-                    data: {
-                        title,
-                        slug: slug,
-                        image
-                    }
-                });
-
-                return NextResponse.json({
-                    status: true,
-                    message: `Category ${title} has been created successfully`
-                });
-            }
-        } catch (error) {
+        if (exist) {
             return NextResponse.json({
                 status: false,
-                error,
-                message: 'Something went wrong !'
+                message: `${title} already exist. Try again!`
+            });
+        } else {
+            if (slug === null || slug.trim() === '') {
+                slug = slugify(title);
+            }
+            const newCategory = await prisma.category.create({
+                data: {
+                    title,
+                    slug: slug
+                }
+            });
+            if (media != null) {
+                await prisma.media.create({
+                    data: {
+                        title,
+                        url: media,
+                        category: {
+                            connect: { id: newCategory?.id }
+                        }
+                    }
+                });
+            }
+
+            return NextResponse.json({
+                status: true,
+                message: `Category ${title} has been created successfully`
             });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    } catch (error) {
+        return NextResponse.json({
+            status: false,
+            error,
+            message: 'Something went wrong !'
+        });
     }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
 
 export const PATCH = async (request: NextRequest) => {
-    let { id, title, slug, image }: IUpdate = await request.json();
-    if (slug === null || slug === '') {
-        slug = slugify(title);
-    }
+    let { id, title, slug, media }: Category = await request.json();
+
     const requiredPermission = 'categories';
 
-    if (await checkPermission(request, requiredPermission)) {
-        try {
+    // if (await checkPermission(request, requiredPermission)) {
+    try {
+        const category = await prisma.category.findFirst({
+            where: { id },
+            include: {
+                image: true
+            }
+        });
+        if (media != null) {
+            await prisma.media.update({
+                where: {
+                    id: category?.image?.id
+                },
+                data: {
+                    url: media
+                }
+            });
+        }
+
+        if (media === null) {
             await prisma.category.update({
                 where: {
                     id
                 },
                 data: {
                     title,
-                    slug: slug,
-                    image
+                    slug: slug
                 }
             });
+        }
 
+        return NextResponse.json({
+            message: `Category ${title} has been update successfully`,
+            status: true
+        });
+    } catch (error: any) {
+        if (error.code == 'P2002') {
             return NextResponse.json({
-                message: `Category ${title} has been update successfully`,
-                status: true
-            });
-        } catch (error: any) {
-            if (error.code == 'P2002') {
-                return NextResponse.json({
-                    message: 'Same title already exist. Try again',
-                    status: false
-                });
-            }
-            return NextResponse.json({
-                message: 'Something went wrong',
-                status: true
+                message: 'Same title already exist. Try again',
+                status: false
             });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+        return NextResponse.json({
+            message: 'Something went wrong',
+            status: true
+        });
     }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
 
 export const DELETE = async (request: NextRequest) => {
