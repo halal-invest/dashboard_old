@@ -38,50 +38,47 @@ export const POST = async (request: NextRequest) => {
 
     if (await checkPermission(request, requiredPermission)) {
         try {
-            if (categoryId != null) {
+            // if (categoryId != null) {
                 await prisma.media.create({
                     data: {
                         title,
-                        url,
-                        category: {
-                            connect: { id: categoryId }
-                        }
+                        url
                     }
                 });
-            }
-            if (subCategoryId != null) {
-                await prisma.media.create({
-                    data: {
-                        title,
-                        url,
-                        subCategory: {
-                            connect: { id: subCategoryId }
-                        }
-                    }
-                });
-            }
-            if (subSubCategoryId != null) {
-                await prisma.media.create({
-                    data: {
-                        title,
-                        url,
-                        subSubCategory: {
-                            connect: { id: subSubCategoryId }
-                        }
-                    }
-                });
-            }
-            if (sizeProductId != null) {
-                await prisma.media.create({
-                    data: {
-                        title,
-                        url,
-                        sizeProduct: {
-                            connect: { id: sizeProductId }
-                        }
-                    }
-                });
-            }
+            // }
+            // if (subCategoryId != null) {
+            //     await prisma.media.create({
+            //         data: {
+            //             title,
+            //             url,
+            //             subCategory: {
+            //                 connect: { id: subCategoryId }
+            //             }
+            //         }
+            //     });
+            // }
+            // if (subSubCategoryId != null) {
+            //     await prisma.media.create({
+            //         data: {
+            //             title,
+            //             url,
+            //             subSubCategory: {
+            //                 connect: { id: subSubCategoryId }
+            //             }
+            //         }
+            //     });
+            // }
+            // if (sizeProductId != null) {
+            //     await prisma.media.create({
+            //         data: {
+            //             title,
+            //             url,
+            //             sizeProduct: {
+            //                 connect: { id: sizeProductId }
+            //             }
+            //         }
+            //     });
+            // }
 
             return NextResponse.json({
                 status: true,
@@ -100,7 +97,7 @@ export const POST = async (request: NextRequest) => {
 };
 
 export const PATCH = async (request: NextRequest) => {
-    let { id, title }: Media = await request.json();
+    let { id, title, url }: Media = await request.json();
     const requiredPermission = 'medias';
 
     if (await checkPermission(request, requiredPermission)) {
@@ -110,7 +107,8 @@ export const PATCH = async (request: NextRequest) => {
                     id
                 },
                 data: {
-                    title
+                    title,
+                    url
                 }
             });
 

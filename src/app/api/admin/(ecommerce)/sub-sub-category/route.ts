@@ -3,28 +3,22 @@ import prisma from '@/utils/connect';
 import { NextRequest, NextResponse } from 'next/server';
 import slugify from 'slugify';
 
-interface ICategory extends IRequest {
+interface SubSubCategory {
     id: number;
-    slug: string;
-}
-
-interface IUpdate extends IRequest {
-    id: number;
-}
-
-interface IRequest {
     title: string;
-    image: string;
     slug: string;
+    media?: { id: number; title: string; url: string; sizeProductId: number | null; categoryId: number | null; subCategoryId: number | null; subSubCategoryId: number | null; createdAt: Date; updatedAt: Date } | null | undefined;
+    imageUrl?: string;
     subCategoryId: number;
 }
+
 
 export const GET = async (request: NextRequest) => {
     const requiredPermission = 'categories';
 
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const categories: ICategory[] = await prisma.subSubCategory.findMany();
+            const categories: SubSubCategory[] = await prisma.subSubCategory.findMany({include:{media:true}});
             return NextResponse.json(categories);
         } catch (error) {
             return NextResponse.json({
@@ -39,12 +33,12 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-    let { title, slug, image, subCategoryId }: IRequest = await request.json();
+    let { title, slug, imageUrl, subCategoryId }: SubSubCategory = await request.json();
     const requiredPermission = 'categories';
 
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const exist: ICategory | null = await prisma.subSubCategory.findFirst({
+            const exist: SubSubCategory | null = await prisma.subSubCategory.findFirst({
                 where: { title }
             });
 
@@ -57,14 +51,25 @@ export const POST = async (request: NextRequest) => {
                 if (slug === null || slug === '') {
                     slug = slugify(title);
                 }
-                await prisma.subSubCategory.create({
+               const newSubSubCategory = await prisma.subSubCategory.create({
                     data: {
                         title,
                         slug: slug,
-                        image,
                         subCategoryId
                     }
                 });
+                if (imageUrl != null) {
+                    await prisma.media.create({
+                        data: {
+                            title: newSubSubCategory?.title,
+                            url: imageUrl,
+                            subSubCategory: {
+                                connect: { id: newSubSubCategory?.id }
+                            }
+                        }
+                    });
+                }
+
 
                 return NextResponse.json({
                     status: true,
@@ -84,7 +89,7 @@ export const POST = async (request: NextRequest) => {
 };
 
 export const PATCH = async (request: NextRequest) => {
-    let { id, title, slug, image, subCategoryId }: IUpdate = await request.json();
+    let { id, title, slug, imageUrl, subCategoryId }: SubSubCategory = await request.json();
     if (slug === null || slug === '') {
         slug = slugify(title);
     }
@@ -92,6 +97,28 @@ export const PATCH = async (request: NextRequest) => {
 
     if (await checkPermission(request, requiredPermission)) {
         try {
+            const subSubCategory = await prisma.subSubCategory.findFirst({ include: { media: true } });
+            if (imageUrl != null) {
+                if (subSubCategory?.media === null) {
+                    await prisma.media.create({
+                        data: {
+                            title: subSubCategory?.title,
+                            url: imageUrl,
+                            subSubCategory: {
+                                connect: { id: subSubCategory?.id }
+                            }
+                        }
+                    });
+                }
+                await prisma.media.update({
+                    where: {
+                        id: subSubCategory?.media?.id
+                    },
+                    data: {
+                        url: imageUrl
+                    }
+                });
+            }
             await prisma.subSubCategory.update({
                 where: {
                     id
@@ -99,13 +126,12 @@ export const PATCH = async (request: NextRequest) => {
                 data: {
                     title,
                     slug: slug,
-                    image,
                     subCategoryId
                 }
             });
 
             return NextResponse.json({
-                message: `Category ${title} has been update successfully`,
+                message: `SubSubCategory ${title} has been update successfully`,
                 status: true
             });
         } catch (error: any) {

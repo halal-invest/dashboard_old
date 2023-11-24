@@ -8,8 +8,8 @@ interface Category {
     id: number;
     title: string;
     slug: string;
-    image?: { id: number; title: string; url: string; sizeProductId: number | null; categoryId: number | null; subCategoryId: number | null; subSubCategoryId: number | null; createdAt: Date; updatedAt: Date } | null | undefined;
-    media?: string;
+    media?: { id: number; title: string; url: string; sizeProductId: number | null; categoryId: number | null; subCategoryId: number | null; subSubCategoryId: number | null; createdAt: Date; updatedAt: Date } | null | undefined;
+    imageUrl?: string;
 }
 
 export const GET = async (request: NextRequest) => {
@@ -19,7 +19,7 @@ export const GET = async (request: NextRequest) => {
     try {
         const categories: Category[] = await prisma.category.findMany({
             include: {
-                image: true
+                media: true
             }
         });
         return NextResponse.json(categories);
@@ -36,7 +36,7 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-    let { title, slug, media }: Category = await request.json();
+    let { title, slug, imageUrl }: Category = await request.json();
     const requiredPermission = 'categories';
 
     // if (await checkPermission(request, requiredPermission)) {
@@ -60,11 +60,11 @@ export const POST = async (request: NextRequest) => {
                     slug: slug
                 }
             });
-            if (media != null) {
+            if (imageUrl != null) {
                 await prisma.media.create({
                     data: {
-                        title,
-                        url: media,
+                        title:newCategory?.title,
+                        url: imageUrl,
                         category: {
                             connect: { id: newCategory?.id }
                         }
@@ -90,7 +90,7 @@ export const POST = async (request: NextRequest) => {
 };
 
 export const PATCH = async (request: NextRequest) => {
-    let { id, title, slug, media }: Category = await request.json();
+    let { id, title, slug, imageUrl }: Category = await request.json();
 
     const requiredPermission = 'categories';
 
@@ -99,21 +99,35 @@ export const PATCH = async (request: NextRequest) => {
         const category = await prisma.category.findFirst({
             where: { id },
             include: {
-                image: true
+                media: true
             }
         });
-        if (media != null) {
+        if (imageUrl != null) {
+            if(category?.media === null){
+                await prisma.media.create({
+                    data: {
+                        title:category?.title,
+                        url: imageUrl,
+                        category: {
+                            connect: { id: category?.id }
+                        }
+                    }
+                });
+            }
             await prisma.media.update({
                 where: {
-                    id: category?.image?.id
+                    id: category?.media?.id
                 },
                 data: {
-                    url: media
+                    url: imageUrl
                 }
             });
+
         }
 
-        if (media === null) {
+        if (slug === null || slug.trim() === '') {
+            slug = slugify(title);
+        }
             await prisma.category.update({
                 where: {
                     id
@@ -123,7 +137,7 @@ export const PATCH = async (request: NextRequest) => {
                     slug: slug
                 }
             });
-        }
+        
 
         return NextResponse.json({
             message: `Category ${title} has been update successfully`,
@@ -160,6 +174,7 @@ export const DELETE = async (request: NextRequest) => {
                         }
                     }
                 });
+                //should delete media for these categories
                 return NextResponse.json({
                     message: 'Categories Delete has been successfully',
                     status: true

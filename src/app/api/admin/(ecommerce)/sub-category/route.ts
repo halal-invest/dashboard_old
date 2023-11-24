@@ -3,19 +3,12 @@ import prisma from '@/utils/connect';
 import { NextRequest, NextResponse } from 'next/server';
 import slugify from 'slugify';
 
-interface ICategory extends IRequest {
+interface SubCategory {
     id: number;
-    slug: string;
-}
-
-interface IUpdate extends IRequest {
-    id: number;
-}
-
-interface IRequest {
     title: string;
-    image: string;
     slug: string;
+    media?: { id: number; title: string; url: string; sizeProductId: number | null; categoryId: number | null; subCategoryId: number | null; subSubCategoryId: number | null; createdAt: Date; updatedAt: Date } | null | undefined;
+    imageUrl?: string;
     categoryId: number;
 }
 
@@ -24,8 +17,10 @@ export const GET = async (request: NextRequest) => {
 
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const categories: ICategory[] = await prisma.subCategory.findMany();
-            return NextResponse.json(categories);
+            const subCategories: SubCategory[] = await prisma.subCategory.findMany({
+                include: { media: true }
+            });
+            return NextResponse.json(subCategories);
         } catch (error) {
             return NextResponse.json({
                 status: false,
@@ -39,12 +34,12 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-    let { title, slug, image, categoryId }: IRequest = await request.json();
+    let { title, slug, imageUrl, categoryId }: SubCategory = await request.json();
     const requiredPermission = 'categories';
 
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const exist: ICategory | null = await prisma.subCategory.findFirst({
+            const exist: SubCategory | null = await prisma.subCategory.findFirst({
                 where: { title }
             });
 
@@ -57,18 +52,28 @@ export const POST = async (request: NextRequest) => {
                 if (slug === null || slug === '') {
                     slug = slugify(title);
                 }
-                await prisma.subCategory.create({
+                const newSubCategory = await prisma.subCategory.create({
                     data: {
                         title,
                         slug: slug,
-                        image,
                         categoryId
                     }
                 });
+                if (imageUrl != null) {
+                    await prisma.media.create({
+                        data: {
+                            title: newSubCategory?.title,
+                            url: imageUrl,
+                            subCategory: {
+                                connect: { id: newSubCategory?.id }
+                            }
+                        }
+                    });
+                }
 
                 return NextResponse.json({
                     status: true,
-                    message: `Category ${title} has been created successfully`
+                    message: `SubCategory ${title} has been created successfully`
                 });
             }
         } catch (error) {
@@ -84,7 +89,7 @@ export const POST = async (request: NextRequest) => {
 };
 
 export const PATCH = async (request: NextRequest) => {
-    let { id, title, slug, image, categoryId }: IUpdate = await request.json();
+    let { id, title, slug, imageUrl, categoryId }: SubCategory = await request.json();
     if (slug === null || slug === '') {
         slug = slugify(title);
     }
@@ -92,7 +97,28 @@ export const PATCH = async (request: NextRequest) => {
 
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const existCategory = await prisma.subCategory.findFirst({});
+            const subCategory = await prisma.subCategory.findFirst({ include: { media: true } });
+            if (imageUrl != null) {
+                if (subCategory?.media === null) {
+                    await prisma.media.create({
+                        data: {
+                            title: subCategory?.title,
+                            url: imageUrl,
+                            subCategory: {
+                                connect: { id: subCategory?.id }
+                            }
+                        }
+                    });
+                }
+                await prisma.media.update({
+                    where: {
+                        id: subCategory?.media?.id
+                    },
+                    data: {
+                        url: imageUrl
+                    }
+                });
+            }
             await prisma.subCategory.update({
                 where: {
                     id
@@ -100,13 +126,12 @@ export const PATCH = async (request: NextRequest) => {
                 data: {
                     title,
                     slug: slug,
-                    image,
                     categoryId: categoryId
                 }
             });
 
             return NextResponse.json({
-                message: `Category ${title} has been update successfully`,
+                message: `SubCategory ${title} has been update successfully`,
                 status: true
             });
         } catch (error: any) {
@@ -141,7 +166,7 @@ export const DELETE = async (request: NextRequest) => {
                     }
                 });
                 return NextResponse.json({
-                    message: 'Categories Delete has been successfully',
+                    message: 'SubCategories Delete has been successfully',
                     status: true
                 });
             } else {
@@ -151,14 +176,14 @@ export const DELETE = async (request: NextRequest) => {
                     }
                 });
                 return NextResponse.json({
-                    message: 'Category Delete has been successfully',
+                    message: 'SubCategory Delete has been successfully',
                     status: true
                 });
             }
         } catch (error: any) {
             if (error.code === 'P2003') {
                 return NextResponse.json({
-                    message: "Child value has existed, don't delete this category",
+                    message: "Child value has existed, don't delete this subCategory",
                     status: false
                 });
             } else {
