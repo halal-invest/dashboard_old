@@ -19,7 +19,8 @@ export const GET = async (request: NextRequest) => {
     try {
         const categories: Category[] = await prisma.category.findMany({
             include: {
-                media: true
+                media: true,
+                subcategory:true
             }
         });
         return NextResponse.json(categories);

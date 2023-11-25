@@ -37,7 +37,7 @@ export const POST = async (request: NextRequest) => {
     let { title, slug, imageUrl, categoryId }: SubCategory = await request.json();
     const requiredPermission = 'categories';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             const exist: SubCategory | null = await prisma.subCategory.findFirst({
                 where: { title }
@@ -83,9 +83,9 @@ export const POST = async (request: NextRequest) => {
                 message: 'Something went wrong !'
             });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
 
 export const PATCH = async (request: NextRequest) => {

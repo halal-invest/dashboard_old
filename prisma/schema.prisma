@@ -46,7 +46,7 @@ model Product {
   id               Int             @id @default(autoincrement())
   title            String
   slug             String          @unique
-  sku              String          @unique
+  sku              String?         @unique
   season           String?
   subSubCategoryId Int?
   subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
@@ -86,15 +86,15 @@ model SizeProduct {
   productId        Int
   product          Product  @relation(fields: [productId], references: [id])
   sizeId           Int
-  size             Size     @relation(fields: [sizeId], references: [id])
-  stock            String?
-  price            String?
-  originalPrice    String?
+  size             Size    @relation(fields: [sizeId], references: [id])
+  stock            Float?
+  price            Float
+  originalPrice    Float
   images           Media[]
-  shortDescription String   @db.Text
+  shortDescription String  @db.Text
   description      String?  @db.Text
-  bestDeal         Boolean
-  discountedSale   Boolean
+  bestDeal         Boolean @default(false)
+  discountedSale   Boolean @default(false)
   colors           Color[]
   orders           Order[]
   createdAt        DateTime @default(now())
