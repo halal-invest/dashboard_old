@@ -86,15 +86,15 @@ model SizeProduct {
   productId        Int
   product          Product  @relation(fields: [productId], references: [id])
   sizeId           Int
-  size             Size    @relation(fields: [sizeId], references: [id])
+  size             Size     @relation(fields: [sizeId], references: [id])
   stock            Float?
   price            Float
   originalPrice    Float
   images           Media[]
-  shortDescription String  @db.Text
+  shortDescription String   @db.Text
   description      String?  @db.Text
-  bestDeal         Boolean @default(false)
-  discountedSale   Boolean @default(false)
+  bestDeal         Boolean  @default(false)
+  discountedSale   Boolean  @default(false)
   colors           Color[]
   orders           Order[]
   createdAt        DateTime @default(now())
@@ -112,21 +112,21 @@ model Color {
 
 model Order {
   id           Int           @id @default(autoincrement())
-  name         String?
-  email        String?
-  phone        String?
-  address      String?
-  city         String?       @default("Dhaka")
+  name         String
+  email        String
+  phone        String
+  address      String
+  city         String        @default("Dhaka")
   country      String?       @default("Bangladesh")
   postal_code  String?
   sizeProducts SizeProduct[]
-  Profile      Profile?      @relation(fields: [profileId], references: [id])
-  profileId    Int?
+  profile      Profile       @relation(fields: [profileId], references: [id])
+  profileId    Int
   subTotal     String
   total        String
 
-  paymentMethods     PaymentMethod? @relation(fields: [paymentMethodsId], references: [id])
-  paymentMethodsId   Int?
+  paymentMethods     PaymentMethod @relation(fields: [paymentMethodsId], references: [id])
+  paymentMethodsId   Int
   transactionPhoneNo String?
   transactionNo      String?
 
