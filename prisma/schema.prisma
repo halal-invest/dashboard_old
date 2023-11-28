@@ -81,64 +81,6 @@ model Size {
   updatedAt    DateTime      @updatedAt
 }
 
-model SizeProduct {
-  id               Int      @id @default(autoincrement())
-  productId        Int
-  product          Product  @relation(fields: [productId], references: [id])
-  sizeId           Int
-  size             Size     @relation(fields: [sizeId], references: [id])
-  stock            Float?
-  price            Float
-  originalPrice    Float
-  images           Media[]
-  shortDescription String   @db.Text
-  description      String?  @db.Text
-  bestDeal         Boolean  @default(false)
-  discountedSale   Boolean  @default(false)
-  colors           Color[]
-  orders           Order[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-}
-
-model Color {
-  id           Int           @id @default(autoincrement())
-  title        String
-  colorCode    String
-  sizeProducts SizeProduct[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
-
-model Order {
-  id           Int           @id @default(autoincrement())
-  name         String
-  email        String
-  phone        String
-  address      String
-  city         String        @default("Dhaka")
-  country      String?       @default("Bangladesh")
-  postal_code  String?
-  sizeProducts SizeProduct[]
-  profile      Profile       @relation(fields: [profileId], references: [id])
-  profileId    Int
-  subTotal     String
-  total        String
-
-  paymentMethods     PaymentMethod @relation(fields: [paymentMethodsId], references: [id])
-  paymentMethodsId   Int
-  transactionPhoneNo String?
-  transactionNo      String?
-
-  deliveryCostId Int
-  deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
-  paymentStatus  String       @default("unpaid") //unpaid, paid
-  orderStatus    String       @default("pending") //pending, received, ready_to_ship, delivered, cancelled
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model PaymentMethod {
   id          Int      @id @default(autoincrement())
   title       String
@@ -153,6 +95,89 @@ model DeliveryCost {
   areaName  String
   cost      String
   orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Color {
+  id           Int           @id @default(autoincrement())
+  title        String
+  colorCode    String
+  sizeProducts SizeProduct[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model SizeProduct {
+  id               Int            @id @default(autoincrement())
+  productId        Int
+  product          Product        @relation(fields: [productId], references: [id])
+  sizeId           Int
+  size             Size           @relation(fields: [sizeId], references: [id])
+  stock            Float?
+  price            Float
+  originalPrice    Float
+  images           Media[]
+  shortDescription String         @db.Text
+  description      String?        @db.Text
+  bestDeal         Boolean        @default(false)
+  discountedSale   Boolean        @default(false)
+  colors           Color[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  ProductOrder     ProductOrder[]
+}
+
+model Order {
+  id           Int            @id @default(autoincrement())
+  name         String
+  email        String
+  phone        String
+  address      String
+  city         String         @default("Dhaka")
+  country      String?        @default("Bangladesh")
+  postal_code  String?
+  productOrder ProductOrder[]
+  profile      Profile        @relation(fields: [profileId], references: [id])
+  profileId    Int
+  subTotal     String
+  total        String
+
+  paymentMethods     PaymentMethod @relation(fields: [paymentMethodsId], references: [id])
+  paymentMethodsId   Int
+  transactionPhoneNo String?
+  transactionNo      String?
+
+  deliveryCostId Int
+  deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
+  paymentStatus  String       @default("unpaid") //unpaid, paid
+  orderStatus    String       @default("pending") //pending, received, ready_to_ship, delivered, cancelled
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductOrder {
+  id            Int         @id @default(autoincrement())
+  orderId       Int
+  order         Order       @relation(fields: [orderId], references: [id])
+  sizeProductId Int
+  sizeProduct   SizeProduct @relation(fields: [sizeProductId], references: [id])
+  price         Float
+  quantity      Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id      Int    @id @default(autoincrement())
+  orderId Int?
+  order   Order? @relation(fields: [orderId], references: [id])
+  amount  Float
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

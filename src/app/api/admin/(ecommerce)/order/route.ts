@@ -25,7 +25,11 @@ interface Order {
         country: string;
         postal_code: string;
     };
-    sizeProductIds: number[];
+    sizeProducts: {
+        id: number;
+        price: number;
+        quantity: number;
+    }[];
     profileId: number;
     subTotal: string;
     total: string;
@@ -48,7 +52,8 @@ export const GET = async (request: NextRequest) => {
             include: {
                 profile: true,
                 paymentMethods: true,
-                deliveryCost: true
+                deliveryCost: true,
+                productOrder: true
             }
         });
         return NextResponse.json(orders);
@@ -65,12 +70,12 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-    let { name, email, phone, address, city, country, postal_code, sizeProductIds, profileId, subTotal, total, paymentMethodsId, transactionPhoneNo, transactionNo, deliveryCostId, paymentStatus, orderStatus }: Order = await request.json();
+    let { name, email, phone, address, city, country, postal_code, sizeProducts, profileId, subTotal, total, paymentMethodsId, transactionPhoneNo, transactionNo, deliveryCostId, paymentStatus, orderStatus }: Order = await request.json();
     const requiredPermission = 'orders';
 
     // if (await checkPermission(request, requiredPermission)) {
     try {
-        const newCategory = await prisma.order.create({
+        const newOrder = await prisma.order.create({
             data: {
                 name,
                 email,
@@ -85,9 +90,6 @@ export const POST = async (request: NextRequest) => {
                 transactionPhoneNo,
                 paymentStatus,
                 orderStatus,
-                sizeProducts: {
-                    connect: sizeProductIds.map((sizeProductId: any) => ({ id: sizeProductId }))
-                },
                 profile: {
                     connect: { id: profileId }
                 },
@@ -95,6 +97,21 @@ export const POST = async (request: NextRequest) => {
                 paymentMethods: { connect: { id: paymentMethodsId } }
             }
         });
+
+        for (let i = 0; i < sizeProducts.length; i++) {
+            const productOrders = await prisma.productOrder.create({
+                data: {
+                    order: {
+                        connect: { id: newOrder.id }
+                    },
+                    sizeProduct: {
+                        connect: { id: sizeProducts[i].id }
+                    },
+                    price: sizeProducts[i].price,
+                    quantity: sizeProducts[i].quantity
+                }
+            });
+        }
 
         return NextResponse.json({
             status: true,
@@ -113,43 +130,21 @@ export const POST = async (request: NextRequest) => {
 };
 
 export const PATCH = async (request: NextRequest) => {
-    let { id, title, slug, imageUrl }: Order = await request.json();
+    let { id, name, email, phone, address, city, country, postal_code, sizeProducts, profileId, subTotal, total, paymentMethodsId, transactionPhoneNo, transactionNo, deliveryCostId, paymentStatus, orderStatus }: Order = await request.json();
 
     const requiredPermission = 'orders';
 
     // if (await checkPermission(request, requiredPermission)) {
     try {
-        const order = await prisma.order.findFirst({
-            where: { id },
-            include: {
-                media: true
-            }
+        const existOrder = await prisma.order.findFirst({
+            where: { id }
         });
-        if (imageUrl != null) {
-            if (order?.media === null) {
-                await prisma.media.create({
-                    data: {
-                        title: order?.title,
-                        url: imageUrl,
-                        order: {
-                            connect: { id: order?.id }
-                        }
-                    }
-                });
-            }
-            await prisma.media.update({
-                where: {
-                    id: order?.media?.id
-                },
-                data: {
-                    url: imageUrl
-                }
-            });
-        }
 
-        if (slug === null || slug.trim() === '') {
-            slug = slugify(title);
-        }
+        const updateOrder = await prisma.order.update({
+            where: { id: id },
+            data: {}
+        });
+
         await prisma.order.update({
             where: {
                 id
