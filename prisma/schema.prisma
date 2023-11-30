@@ -148,6 +148,9 @@ model Order {
   transactionPhoneNo String?
   transactionNo      String?
 
+  couponId Int?
+  coupon   Coupon? @relation(fields: [couponId], references: [id])
+
   deliveryCostId Int
   deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
   paymentStatus  String       @default("unpaid") //unpaid, paid
@@ -170,6 +173,18 @@ model ProductOrder {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Coupon {
+  id         Int       @id @default(autoincrement())
+  title      String
+  amount     Float?
+  percentage Float?
+  isActive   Boolean
+  validDate  DateTime?
+  order      Order[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 model Payment {

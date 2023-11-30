@@ -41,6 +41,7 @@ interface Order {
     deliveryCost: any;
     paymentStatus: string;
     orderStatus: string;
+    couponId?: number|undefined;
 }
 
 export const GET = async (request: NextRequest) => {
@@ -70,7 +71,7 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-    let { name, email, phone, address, city, country, postal_code, sizeProducts, profileId, subTotal, total, paymentMethodsId, transactionPhoneNo, transactionNo, deliveryCostId, paymentStatus, orderStatus }: Order = await request.json();
+    let { name, email, phone, address, city, country, postal_code, sizeProducts, profileId, subTotal, total, paymentMethodsId, transactionPhoneNo, transactionNo, deliveryCostId, paymentStatus, orderStatus, couponId }: Order = await request.json();
     const requiredPermission = 'orders';
 
     // if (await checkPermission(request, requiredPermission)) {
@@ -94,7 +95,8 @@ export const POST = async (request: NextRequest) => {
                     connect: { id: profileId }
                 },
                 deliveryCost: { connect: { id: deliveryCostId } },
-                paymentMethods: { connect: { id: paymentMethodsId } }
+                paymentMethods: { connect: { id: paymentMethodsId } },
+                couponId
             }
         });
 
@@ -130,33 +132,67 @@ export const POST = async (request: NextRequest) => {
 };
 
 export const PATCH = async (request: NextRequest) => {
-    let { id, name, email, phone, address, city, country, postal_code, sizeProducts, profileId, subTotal, total, paymentMethodsId, transactionPhoneNo, transactionNo, deliveryCostId, paymentStatus, orderStatus }: Order = await request.json();
+    let { id, name, email, phone, address, city, country, postal_code, sizeProducts, profileId, subTotal, total, paymentMethodsId, transactionPhoneNo, transactionNo, deliveryCostId, paymentStatus, orderStatus, couponId }: Order = await request.json();
 
     const requiredPermission = 'orders';
 
     // if (await checkPermission(request, requiredPermission)) {
     try {
         const existOrder = await prisma.order.findFirst({
-            where: { id }
+            where: { id },
+            include: {
+                productOrder: true,
+                profile: true,
+                paymentMethods: true,
+                deliveryCost: true,
+                payments: true,
+            }
         });
 
         const updateOrder = await prisma.order.update({
             where: { id: id },
-            data: {}
-        });
-
-        await prisma.order.update({
-            where: {
-                id
-            },
             data: {
-                title,
-                slug: slug
+                name,
+                email,
+                phone,
+                address,
+                city,
+                country,
+                postal_code,
+                subTotal,
+                total,
+                transactionNo,
+                transactionPhoneNo,
+                productOrder: {
+                    disconnect: existOrder?.productOrder
+                },
+                deliveryCost: {
+                    connect: {id: deliveryCostId}
+                },
+                paymentMethods: {
+                    connect: {id: paymentMethodsId}
+                },
+                couponId
             }
         });
 
+        for (let i = 0; i < sizeProducts.length; i++) {
+            const updatedProductOrders = await prisma.productOrder.create({
+                data: {
+                    order: {
+                        connect: { id:id }
+                    },
+                    sizeProduct: {
+                        connect: { id: sizeProducts[i].id }
+                    },
+                    price: sizeProducts[i].price,
+                    quantity: sizeProducts[i].quantity
+                }
+            });
+        }
+
         return NextResponse.json({
-            message: `Order ${title} has been update successfully`,
+            message: `Order has been update successfully`,
             status: true
         });
     } catch (error: any) {
