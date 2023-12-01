@@ -1,7 +1,7 @@
 import prisma from "@/utils/connect";
 import { NextResponse } from "next/server";
 
-interface ISubCategory {
+interface ICategory {
     id: number,
     title: string,
     slug: string,
@@ -10,15 +10,14 @@ interface ISubCategory {
 
 export const GET = async (request: Request, { params }: { params: { slug: string } }) => {
 
+
     try {
-        const subCategories: ISubCategory[] = await prisma.subCategory.findMany({
+        const category: ICategory | null = await prisma.category.findFirst({
             where: {
-                category: {
-                    slug: params.slug,
-                }
+                slug: params.slug,
             }
         });
-        return NextResponse.json(subCategories);
+        return NextResponse.json(category);
     } catch (error) {
         return NextResponse.json({
             status: false,

@@ -11,51 +11,201 @@ model Category {
   id          Int           @id @default(autoincrement())
   title       String
   slug        String        @unique
-  image       String
+  media       Media?
   subcategory SubCategory[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model SubCategory {
-  id         Int      @id @default(autoincrement())
-  title      String
-  slug       String   @unique
-  image      String
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId Int
+  id             Int              @id @default(autoincrement())
+  title          String
+  slug           String           @unique
+  media          Media?
+  category       Category         @relation(fields: [categoryId], references: [id])
+  categoryId     Int              @unique
+  subSubCategory SubSubCategory[]
+  products       Product[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model SubSubCategory {
+  id            Int         @id @default(autoincrement())
+  title         String
+  slug          String      @unique
+  media         Media?
+  subCategoryId Int         @unique
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
+  products      Product[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Product {
-  id               Int     @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   title            String
-  slug             String  @unique
-  sku              String
-  season           String
-  stock            String
-  price            String
-  originalPrice    String
-  colors           String
-  sizes            Size[]
-  images           String
-  shortDescription String  @db.Text
-  description      String  @db.Text
-  brand            String
-  subCategoryId    String
-  bestDeal         Boolean
-  discountedSale   Boolean
+  slug             String          @unique
+  sku              String?         @unique
+  season           String?
+  subSubCategoryId Int?
+  subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
+  sizeProducts     SizeProduct[]
+  subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
+  subCategoryId    Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Media {
+  id               Int             @id @default(autoincrement())
+  title            String
+  url              String
+  sizeProductId    Int?
+  sizeProduct      SizeProduct?    @relation(fields: [sizeProductId], references: [id])
+  categoryId       Int?            @unique
+  category         Category?       @relation(fields: [categoryId], references: [id])
+  subCategoryId    Int?            @unique
+  subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
+  subSubCategoryId Int?            @unique
+  subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model Size {
-  id        Int      @id @default(autoincrement())
-  title     String
-  Product   Product? @relation(fields: [productId], references: [id])
-  productId Int?
+  id           Int           @id @default(autoincrement())
+  title        String
+  sizeProducts SizeProduct[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
+model PaymentMethod {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DeliveryCost {
+  id        Int      @id @default(autoincrement())
+  areaName  String
+  cost      String
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Color {
+  id           Int           @id @default(autoincrement())
+  title        String
+  colorCode    String
+  sizeProducts SizeProduct[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model SizeProduct {
+  id               Int            @id @default(autoincrement())
+  productId        Int
+  product          Product        @relation(fields: [productId], references: [id])
+  sizeId           Int
+  size             Size           @relation(fields: [sizeId], references: [id])
+  stock            Float?
+  price            Float
+  originalPrice    Float
+  images           Media[]
+  shortDescription String         @db.Text
+  description      String?        @db.Text
+  bestDeal         Boolean        @default(false)
+  discountedSale   Boolean        @default(false)
+  colors           Color[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  ProductOrder     ProductOrder[]
+}
+
+model Order {
+  id           Int            @id @default(autoincrement())
+  name         String
+  email        String
+  phone        String
+  address      String
+  city         String         @default("Dhaka")
+  country      String?        @default("Bangladesh")
+  postal_code  String?
+  productOrder ProductOrder[]
+  profile      Profile        @relation(fields: [profileId], references: [id])
+  profileId    Int
+  subTotal     String
+  total        String
+
+  paymentMethods     PaymentMethod @relation(fields: [paymentMethodsId], references: [id])
+  paymentMethodsId   Int
+  transactionPhoneNo String?
+  transactionNo      String?
+
+  couponId Int?
+  coupon   Coupon? @relation(fields: [couponId], references: [id])
+
+  deliveryCostId Int
+  deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
+  paymentStatus  String       @default("unpaid") //unpaid, paid
+  orderStatus    String       @default("pending") //pending, received, ready_to_ship, delivered, cancelled
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductOrder {
+  id            Int         @id @default(autoincrement())
+  orderId       Int
+  order         Order       @relation(fields: [orderId], references: [id])
+  sizeProductId Int
+  sizeProduct   SizeProduct @relation(fields: [sizeProductId], references: [id])
+  price         Float
+  quantity      Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Coupon {
+  id         Int       @id @default(autoincrement())
+  title      String
+  amount     Float?
+  percentage Float?
+  isActive   Boolean
+  validDate  DateTime?
+  order      Order[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Payment {
+  id      Int    @id @default(autoincrement())
+  orderId Int?
+  order   Order? @relation(fields: [orderId], references: [id])
+  amount  Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//blog section
+
 model SubBLog {
-  id    Int    @id @default(autoincrement())
-  title String
-  slug  String @unique
-  blog  Blog[]
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  blogs     Blog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Blog {
@@ -65,8 +215,67 @@ model Blog {
   image     String?
   author    String
   content   String   @db.Text
-  subBLog   SubBLog? @relation(fields: [subBLogId], references: [id])
-  subBLogId Int?
+  subBlog   SubBLog? @relation(fields: [subBlogId], references: [id])
+  subBlogId Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//authentication
+model Permission {
+  id          Int      @id @unique @default(autoincrement())
+  title       String   @unique
+  description String?
+  roles       Role[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Role {
+  id          Int          @id @unique @default(autoincrement())
+  title       String       @unique
+  description String
+  permissions Permission[]
+  profiles    Profile[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String?  @unique
+  password  String?
+  verified  Boolean  @default(false)
+  profile   Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OtpUser {
+  id        Int      @id @default(autoincrement())
+  phone     String   @unique
+  profile   Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profile {
+  id          Int      @id @default(autoincrement())
+  userId      Int?     @unique
+  user        User?    @relation(fields: [userId], references: [id])
+  otpUserId   Int?     @unique
+  optUser     OtpUser? @relation(fields: [otpUserId], references: [id])
+  name        String?
+  email       String?
+  phone       String?
+  roles       Role[]
+  address     String?
+  city        String?  @default("Dhaka")
+  country     String?  @default("Bangladesh")
+  postal_code String?
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Coupon {
