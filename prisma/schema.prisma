@@ -278,23 +278,6 @@ model Profile {
   updatedAt   DateTime @updatedAt
 }
 
-model Coupon {
-  id        Int      @id @default(autoincrement())
-  title     String
-  slug      String   @unique
-  discount  Int
-  type      String
-  status    Boolean
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model PaymentMethod {
-  id          Int    @id @default(autoincrement())
-  title       String @unique
-  description String
-}
-
 model Shipping {
   id          Int    @id @default(autoincrement())
   title       String @unique

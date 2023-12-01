@@ -24,7 +24,7 @@ export const POST = async (request: Request) => {
                 const tokenData: TokenData = decodedToken as TokenData;
                 emailFromToken = tokenData?.email;
                 if (email !== emailFromToken) {
-                    return NextResponse.json({ message: 'Invitation sent with a different email address.', status: false });
+                    return NextResponse.json({ message: 'Verification link was sent to a different email address.', status: false });
                 }
                 const existUser = await prisma.user.findUnique({
                     where: { email }
@@ -77,6 +77,6 @@ export const POST = async (request: Request) => {
         }
     } catch (error: any) {
         console.log(error);
-        return NextResponse.json({ message: error?.message, status: false, msg: 'catch error' });
+        return NextResponse.json({ message: error?.message, status: false });
     }
 };

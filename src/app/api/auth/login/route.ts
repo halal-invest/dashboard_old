@@ -37,11 +37,11 @@ export const POST = async (request: Request) => {
                 path: '/',
                 maxAge: MAX_AGE
             });
-            const userProfile = await prisma.profile.findFirst({
-                where: { id: existUser?.id }
-            });
+            // const userProfile = await prisma.profile.findFirst({
+            //     where: { id: existUser?.id }
+            // });
 
-            return new Response(JSON.stringify({ user: userProfile, message: 'Authenticated', status: true }), {
+            return new Response(JSON.stringify({ message: 'login successful', token: token, status: true }), {
                 headers: { 'Set-Cookie': serialized },
                 status: 200
             });

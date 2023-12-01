@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
 import { hash } from 'bcrypt';
 import { sendEmailWithNodemailer } from '@/utils/emails';
-import { JWT_JOIN_SECRET } from '@/utils/constants';
+import { JWT_JOIN_SECRET, URL } from '@/utils/constants';
 import jwt from 'jsonwebtoken';
 const MAX_AGE = 60 * 60 * 24 * 7;
 export const POST = async (request: NextRequest) => {
@@ -22,11 +22,11 @@ export const POST = async (request: NextRequest) => {
         if (!validatePassword(password)) {
             return NextResponse.json({ message: 'Password should be at least 6 characters long, contains at least one capital letter and at least one number', status: false });
         }
-     
+
         const token = jwt.sign({ email }, JWT_JOIN_SECRET, { expiresIn: MAX_AGE });
         const verificationLink = `${URL}/auth/join?email=${email}&token=${token}`;
         const emailData = {
-            from: `${process.env.EMAIL_USER}`, 
+            from: `${process.env.EMAIL_USER}`,
             to: email,
             subject: 'Verification Link.',
             html: `
@@ -44,7 +44,7 @@ export const POST = async (request: NextRequest) => {
                 data: {
                     email,
                     password: hashedPassword,
-                    verified: false,
+                    verified: false
                 }
             });
         }
