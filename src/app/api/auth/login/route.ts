@@ -4,11 +4,45 @@ import { compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 import { JWT_SECRET } from '../../../../utils/constants';
-import { cookies } from 'next/headers'
+import { cookies } from 'next/headers';
 const MAX_AGE = 60 * 60 * 24 * 30;
-export const POST = async (request: Request) => {
+
+import { string, number, object } from 'yup';
+import sanitize from 'sanitize-html';
+import requestIp from 'request-ip';
+import { get, set } from 'lodash';
+import { NextApiRequest } from 'next';
+
+const rateLimit = 3;
+const rateLimiter = {};
+const rateLimiterMiddleware = (ip) => {
+    const now = Date.now();
+    const windowStart = now - 60 * 1000 * 5;
+    const requestTimestamps = get(rateLimiter, ip, []).filter((timestamp: number) => timestamp > windowStart);
+    requestTimestamps.push(now);
+
+    set(rateLimiter, ip, requestTimestamps);
+
+    return requestTimestamps.length <= rateLimit;
+};
+const schema = object().shape({
+    email: string().required().email(),
+    password: string().required().min(8).max(16)
+});
+
+export const POST = async (request: Request, req: NextApiRequest) => {
     const { email, password } = await request.json();
     try {
+        const ip = requestIp.getClientIp(req);
+        if (!rateLimiterMiddleware(ip)) {
+            return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });
+        }
+        const cleanInput = {
+            email: sanitize(email),
+            password: sanitize(password)
+        };
+        await schema.validate(cleanInput);
+
         const existUser: any = await prisma.user.findUnique({
             where: { email },
             select: {
@@ -26,8 +60,8 @@ export const POST = async (request: Request) => {
                 name: 'email',
                 value: email,
                 httpOnly: true,
-                path: '/',
-              })
+                path: '/'
+            });
             const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: MAX_AGE });
 
             const serialized = serialize('jwt', token, {
@@ -49,6 +83,7 @@ export const POST = async (request: Request) => {
             return NextResponse.json({ message: 'Password Incorrect.', status: false });
         }
     } catch (error) {
+        console.log(error);
         return NextResponse.json({ message: error, status: 500, msg: 'catch error' });
     }
 };

@@ -5,22 +5,49 @@ import { sendEmailWithNodemailer } from '@/utils/emails';
 import { JWT_JOIN_SECRET, URL } from '@/utils/constants';
 import jwt from 'jsonwebtoken';
 const MAX_AGE = 60 * 60 * 24 * 7;
-export const POST = async (request: NextRequest) => {
+
+import { string, number, object } from 'yup';
+import sanitize from 'sanitize-html';
+import requestIp from 'request-ip';
+import { get, set } from 'lodash';
+import { NextApiRequest } from 'next';
+
+const rateLimit = 3; 
+const rateLimiter = {};
+const rateLimiterMiddleware = (ip) => {
+    const now = Date.now();
+    const windowStart = now - 60 * 1000 * 5; 
+    const requestTimestamps = get(rateLimiter, ip, []).filter((timestamp: number) => timestamp > windowStart);
+    requestTimestamps.push(now);
+
+    set(rateLimiter, ip, requestTimestamps);
+
+    return requestTimestamps.length <= rateLimit;
+};
+const schema = object().shape({
+    email: string().required().email(),
+    password: string().required().min(8).max(16)
+});
+
+export const POST = async (request: NextRequest, req: NextApiRequest) => {
     const { email, password } = await request.json();
-    function validatePassword(password: string) {
-        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
-        return passwordRegex.test(password);
-    }
     try {
+        const ip = requestIp.getClientIp(req);
+        if (!rateLimiterMiddleware(ip)) {
+            return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });
+        }
+        const cleanInput = {
+            email: sanitize(email),
+            password: sanitize(password)
+        };
+        await schema.validate(cleanInput);
+
         const existUser = await prisma.user.findFirst({
             where: { email },
             select: { verified: true }
         });
         if (existUser?.verified) {
             return NextResponse.json({ message: 'User with this email already exists. Try with a new email.' });
-        }
-        if (!validatePassword(password)) {
-            return NextResponse.json({ message: 'Password should be at least 6 characters long, contains at least one capital letter and at least one number', status: false });
         }
 
         const token = jwt.sign({ email }, JWT_JOIN_SECRET, { expiresIn: MAX_AGE });
@@ -49,7 +76,7 @@ export const POST = async (request: NextRequest) => {
             });
         }
         return NextResponse.json({ token: token, message: 'Verification Link sent to your Email. Waiting for Verification.' });
-    } catch (error) {
+    } catch (error: any) {
         return NextResponse.json({ message: error, status: 500 });
     }
 };
