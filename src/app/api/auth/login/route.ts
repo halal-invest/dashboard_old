@@ -3,11 +3,12 @@ import prisma from '../../../../utils/connect';
 import { compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
-import { JWT_SECRET } from '../../../../utils/constants';
+import { JWT_SECRET, REFRESH_TOKEN_SECRET } from '../../../../utils/constants';
 import { cookies } from 'next/headers';
-const MAX_AGE = 60 * 60 * 24 * 30;
+const ACCESS_TOKEN_AGE = 60 * 60 * 24 * 30;
+const REFRESH_TOKEN_AGE = 60 * 60 * 24 * 30;
 
-import { string, number, object } from 'yup';
+import { string, number, object, ref } from 'yup';
 import sanitize from 'sanitize-html';
 import requestIp from 'request-ip';
 import { get, set } from 'lodash';
@@ -60,16 +61,26 @@ export const POST = async (request: Request, req: NextApiRequest) => {
                 name: 'email',
                 value: email,
                 httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
                 path: '/'
             });
-            const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: MAX_AGE });
+            const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_AGE });
+            // const refresh_token = jwt.sign({ email }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_AGE });
 
+            // cookies().set({
+            //     name: 'refresh_token',
+            //     value: refresh_token,
+            //     httpOnly: true,
+            //     secure: process.env.NODE_ENV === 'production',
+            //     path: '/',
+            //     maxAge: REFRESH_TOKEN_AGE
+            // });
             const serialized = serialize('jwt', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
                 path: '/',
-                maxAge: MAX_AGE
+                maxAge: ACCESS_TOKEN_AGE
             });
             // const userProfile = await prisma.profile.findFirst({
             //     where: { id: existUser?.id }
