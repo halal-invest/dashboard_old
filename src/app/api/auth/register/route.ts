@@ -26,7 +26,7 @@ const rateLimiterMiddleware = (ip) => {
 };
 const schema = object().shape({
     email: string().required().email(),
-    password: string().required().min(8).max(16)
+    password: string().required().min(6).max(16)
 });
 
 export const POST = async (request: NextRequest, req: NextApiRequest) => {
