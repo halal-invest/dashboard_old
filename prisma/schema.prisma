@@ -53,6 +53,8 @@ model Product {
   sizeProducts     SizeProduct[]
   subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
   subCategoryId    Int?
+  isActive         Boolean         @default(true)
+  isDeleted        Boolean         @default(false)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 }
@@ -123,9 +125,11 @@ model SizeProduct {
   bestDeal         Boolean        @default(false)
   discountedSale   Boolean        @default(false)
   colors           Color[]
+  ProductOrder     ProductOrder[]
+  isActive         Boolean        @default(true)
+  isDeleted        Boolean        @default(false)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
-  ProductOrder     ProductOrder[]
 }
 
 model Order {
@@ -237,6 +241,8 @@ model Role {
   description String
   permissions Permission[]
   profiles    Profile[]
+  isActive    Boolean      @default(true)
+  isDeleted   Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -247,6 +253,8 @@ model User {
   password  String?
   verified  Boolean  @default(false)
   profile   Profile?
+  isActive  Boolean  @default(true)
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -255,6 +263,8 @@ model OtpUser {
   id        Int      @id @default(autoincrement())
   phone     String   @unique
   profile   Profile?
+  isActive  Boolean  @default(true)
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
