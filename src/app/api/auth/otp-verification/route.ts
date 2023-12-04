@@ -20,7 +20,7 @@ export const POST = async (request: Request) => {
     let numberFromToken = '';
     try {
         if (token) {
-            const verified = verify(token, JWT_SECRET);
+            verify(token, JWT_SECRET);
 
             const decodedToken = decode(token);
             if (decodedToken && typeof decodedToken === 'object' && 'phone' in decodedToken) {

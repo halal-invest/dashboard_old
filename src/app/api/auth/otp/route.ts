@@ -3,9 +3,44 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../../../../utils/constants';
 import axios from 'axios';
 const MAX_AGE = 60 * 60 * 24 *30;
-export const POST = async (request: Request) => {
+
+import { string, number, object } from 'yup';
+import sanitize from 'sanitize-html';
+import requestIp from 'request-ip';
+import { get, set } from 'lodash';
+import { NextApiRequest } from 'next';
+
+const rateLimit = 3; 
+const rateLimiter = {};
+const rateLimiterMiddleware = (ip) => {
+    const now = Date.now();
+    const windowStart = now - 60 * 1000 * 5; 
+    const requestTimestamps = get(rateLimiter, ip, []).filter((timestamp: number) => timestamp > windowStart);
+    requestTimestamps.push(now);
+
+    set(rateLimiter, ip, requestTimestamps);
+
+    return requestTimestamps.length <= rateLimit;
+};
+const schema = object().shape({
+    phone: string().test(
+        'len',
+        'Phone number must be exactly 11 digits',
+        val => String(val).length === 11
+    ),
+});
+export const POST = async (request: Request, req: NextApiRequest) => {
     const { phone } = await request.json();
     try {
+        const ip = requestIp.getClientIp(req);
+        if (!rateLimiterMiddleware(ip)) {
+            return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });
+        }
+        const cleanInput = {
+            phone: sanitize(phone)
+        };
+        await schema.validate(cleanInput);
+
             const randomNumber = Math.floor(100000 + Math.random() * 900000);
             const jwtToken = jwt.sign({ phone,randomNumber }, JWT_SECRET, { expiresIn: MAX_AGE });
             const greenwebsms = new URLSearchParams();
