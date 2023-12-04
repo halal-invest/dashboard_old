@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
 import { hash } from 'bcrypt';
 import { checkPermission } from '@/utils/checkPermissions';
-import { disconnect } from 'process';
 export const GET = async (request: NextRequest) => {
     const requiredPermission = 'users_manage';
     if (await checkPermission(request, requiredPermission)) {
@@ -13,7 +12,9 @@ export const GET = async (request: NextRequest) => {
                     verified: true,
                     email: true,
                     createdAt: true,
-                    updatedAt: true
+                    updatedAt: true,
+                    isActive: true,
+                    isDeleted: false
                 }
             });
             return NextResponse.json(users, { status: 200 });
@@ -74,7 +75,7 @@ export const PUT = async (request: NextRequest) => {
     let hashedPassword;
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const { id, password, email, roles } = await request.json();
+            const { id, password, email, roles, isActive } = await request.json();
 
             const existingUser = await prisma.user.findUnique({
                 where: {
@@ -100,10 +101,11 @@ export const PUT = async (request: NextRequest) => {
                 },
                 data: {
                     password: hashedPassword,
-                    email
+                    email,
+                    isActive
                 }
             });
-            const updatedProfile = await prisma.profile.update({
+            await prisma.profile.update({
                 where: { id: existProfile?.id },
                 data: {
                     roles: {
@@ -128,19 +130,18 @@ export const PUT = async (request: NextRequest) => {
 
 export const DELETE = async (request: NextRequest) => {
     const requiredPermission = 'users_manage';
+    const { searchParams } = new URL(request.url);
+    const softDelete = searchParams.get('softDelete');
+    console.log(softDelete);
+
     const { id } = await request.json();
-    const defaultUserIdObjects = await prisma.user.findMany({
-        where: {
-            email: {
-                in: ['alarafatsiddique@gmail.com']
-            }
-        },
-        select: {
-            id: true
-        }
+    console.log(id);
+    const defaultUser = await prisma.user.findUnique({
+        where: {email: "alarafatsiddique@gmail.com"}
     });
-    const defaultUserIds = defaultUserIdObjects.map((obj) => obj.id);
-    const deleteOrNot = defaultUserIds.some((item) => id.includes(item));
+  
+    const deleteOrNot = id.includes(defaultUser?.id);
+    console.log(deleteOrNot);
     if (await checkPermission(request, requiredPermission)) {
         try {
             if (id.length > 1) {
@@ -150,13 +151,28 @@ export const DELETE = async (request: NextRequest) => {
                         status: false
                     });
                 }
-                await prisma.user.deleteMany({
-                    where: {
-                        id: {
-                            in: id
+                if (softDelete) {
+                    await prisma.user.updateMany({
+                        where: {
+                            id: {
+                                in: id
+                            }
+                        },
+                        data: {
+                            isDeleted: true
                         }
-                    }
-                });
+                    });
+                }
+                if (!softDelete) {
+                    await prisma.user.deleteMany({
+                        where: {
+                            id: {
+                                in: id
+                            }
+                        }
+                    });
+                }
+
                 return NextResponse.json({
                     message: 'Users Delete has been successfully',
                     status: true
@@ -168,11 +184,23 @@ export const DELETE = async (request: NextRequest) => {
                         status: false
                     });
                 }
-                await prisma.user.delete({
-                    where: {
-                        id: id[0]
-                    }
-                });
+                if (softDelete) {
+                    await prisma.user.update({
+                        where: {
+                            id: id[0]
+                        },
+                        data: {
+                            isDeleted: true
+                        }
+                    });
+                }
+                if (!softDelete) {
+                    await prisma.user.delete({
+                        where: {
+                            id: id[0]
+                        }
+                    });
+                }
 
                 return NextResponse.json({
                     message: 'Users Delete has been successfully',
