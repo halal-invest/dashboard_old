@@ -16,7 +16,7 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
         return NextResponse.json({ message: 'Unauthorized', status: 401 });
     }
     try {
-        const verified = verify(token?.value, REFRESH_TOKEN_SECRET);
+        const verified = verify(token?.value, JWT_SECRET);
         //email-password users
         if (phone === undefined) {
             const existUser = await prisma.user.findUnique({

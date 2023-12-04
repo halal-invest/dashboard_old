@@ -11,7 +11,7 @@ model Category {
   id          Int           @id @default(autoincrement())
   title       String
   slug        String        @unique
-  image       String
+  media       Media?
   subcategory SubCategory[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -21,7 +21,7 @@ model SubCategory {
   id             Int              @id @default(autoincrement())
   title          String
   slug           String           @unique
-  image          String
+  media          Media?
   category       Category         @relation(fields: [categoryId], references: [id])
   categoryId     Int              @unique
   subSubCategory SubSubCategory[]
@@ -34,7 +34,7 @@ model SubSubCategory {
   id            Int         @id @default(autoincrement())
   title         String
   slug          String      @unique
-  image         String
+  media         Media?
   subCategoryId Int         @unique
   subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
   products      Product[]
@@ -46,25 +46,33 @@ model Product {
   id               Int             @id @default(autoincrement())
   title            String
   slug             String          @unique
-  sku              String          @unique
+  sku              String?         @unique
   season           String?
   subSubCategoryId Int?
   subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
   sizeProducts     SizeProduct[]
   subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
   subCategoryId    Int?
+  isActive         Boolean         @default(true)
+  isDeleted        Boolean         @default(false)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 }
 
 model Media {
-  id            Int          @id @default(autoincrement())
-  title         String
-  image         String
-  sizeProduct   SizeProduct? @relation(fields: [sizeProductId], references: [id])
-  sizeProductId Int?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id               Int             @id @default(autoincrement())
+  title            String
+  url              String
+  sizeProductId    Int?
+  sizeProduct      SizeProduct?    @relation(fields: [sizeProductId], references: [id])
+  categoryId       Int?            @unique
+  category         Category?       @relation(fields: [categoryId], references: [id])
+  subCategoryId    Int?            @unique
+  subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
+  subSubCategoryId Int?            @unique
+  subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model Size {
@@ -73,64 +81,6 @@ model Size {
   sizeProducts SizeProduct[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-}
-
-model SizeProduct {
-  id               Int      @id @default(autoincrement())
-  productId        Int
-  product          Product  @relation(fields: [productId], references: [id])
-  sizeId           Int
-  size             Size     @relation(fields: [sizeId], references: [id])
-  stock            String?
-  price            String?
-  originalPrice    String?
-  images           Media[]
-  shortDescription String   @db.Text
-  description      String?  @db.Text
-  bestDeal         Boolean
-  discountedSale   Boolean
-  colors           Color[]
-  orders           Order[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-}
-
-model Color {
-  id           Int           @id @default(autoincrement())
-  title        String
-  colorCode    String
-  sizeProducts SizeProduct[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
-
-model Order {
-  id           Int           @id @default(autoincrement())
-  name         String?
-  email        String?
-  phone        String?
-  address      String?
-  city         String?       @default("Dhaka")
-  country      String?       @default("Bangladesh")
-  postal_code  String?
-  sizeProducts SizeProduct[]
-  Profile      Profile?      @relation(fields: [profileId], references: [id])
-  profileId    Int?
-  subTotal     String
-  total        String
-
-  paymentMethods     PaymentMethod? @relation(fields: [paymentMethodsId], references: [id])
-  paymentMethodsId   Int?
-  transactionPhoneNo String?
-  transactionNo      String?
-
-  deliveryCostId Int
-  deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
-  paymentStatus  String       @default("unpaid") //unpaid, paid
-  orderStatus    String       @default("pending") //pending, received, ready_to_ship, delivered, cancelled
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model PaymentMethod {
@@ -147,6 +97,106 @@ model DeliveryCost {
   areaName  String
   cost      String
   orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Color {
+  id           Int           @id @default(autoincrement())
+  title        String
+  colorCode    String
+  sizeProducts SizeProduct[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model SizeProduct {
+  id               Int            @id @default(autoincrement())
+  productId        Int
+  product          Product        @relation(fields: [productId], references: [id])
+  sizeId           Int
+  size             Size           @relation(fields: [sizeId], references: [id])
+  stock            Float?
+  price            Float
+  originalPrice    Float
+  images           Media[]
+  shortDescription String         @db.Text
+  description      String?        @db.Text
+  bestDeal         Boolean        @default(false)
+  discountedSale   Boolean        @default(false)
+  colors           Color[]
+  ProductOrder     ProductOrder[]
+  isActive         Boolean        @default(true)
+  isDeleted        Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Order {
+  id           Int            @id @default(autoincrement())
+  name         String
+  email        String
+  phone        String
+  address      String
+  city         String         @default("Dhaka")
+  country      String?        @default("Bangladesh")
+  postal_code  String?
+  productOrder ProductOrder[]
+  profile      Profile        @relation(fields: [profileId], references: [id])
+  profileId    Int
+  subTotal     String
+  total        String
+
+  paymentMethods     PaymentMethod @relation(fields: [paymentMethodsId], references: [id])
+  paymentMethodsId   Int
+  transactionPhoneNo String?
+  transactionNo      String?
+
+  couponId Int?
+  coupon   Coupon? @relation(fields: [couponId], references: [id])
+
+  deliveryCostId Int
+  deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
+  paymentStatus  String       @default("unpaid") //unpaid, paid
+  orderStatus    String       @default("pending") //pending, received, ready_to_ship, delivered, cancelled
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductOrder {
+  id            Int         @id @default(autoincrement())
+  orderId       Int
+  order         Order       @relation(fields: [orderId], references: [id])
+  sizeProductId Int
+  sizeProduct   SizeProduct @relation(fields: [sizeProductId], references: [id])
+  price         Float
+  quantity      Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Coupon {
+  id         Int       @id @default(autoincrement())
+  title      String
+  amount     Float?
+  percentage Float?
+  isActive   Boolean
+  validDate  DateTime?
+  order      Order[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Payment {
+  id      Int    @id @default(autoincrement())
+  orderId Int?
+  order   Order? @relation(fields: [orderId], references: [id])
+  amount  Float
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -191,6 +241,8 @@ model Role {
   description String
   permissions Permission[]
   profiles    Profile[]
+  isActive    Boolean      @default(true)
+  isDeleted   Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -201,6 +253,8 @@ model User {
   password  String?
   verified  Boolean  @default(false)
   profile   Profile?
+  isActive  Boolean  @default(true)
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -209,6 +263,8 @@ model OtpUser {
   id        Int      @id @default(autoincrement())
   phone     String   @unique
   profile   Profile?
+  isActive  Boolean  @default(true)
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
