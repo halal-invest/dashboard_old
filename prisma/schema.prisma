@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+   relationMode = "prisma"
 }
 
 model Category {
@@ -57,6 +58,9 @@ model Product {
   isDeleted        Boolean         @default(false)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+
+  @@index([subSubCategoryId])
+  @@index([subCategoryId])
 }
 
 model Media {
@@ -73,6 +77,8 @@ model Media {
   subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+
+  @@index([sizeProductId])
 }
 
 model Size {
@@ -130,6 +136,9 @@ model SizeProduct {
   isDeleted        Boolean        @default(false)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+
+  @@index([productId])
+  @@index([sizeId])
 }
 
 model Order {
@@ -164,6 +173,11 @@ model Order {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([profileId])
+  @@index([paymentMethodsId])
+  @@index([couponId])
+  @@index([deliveryCostId])
 }
 
 model ProductOrder {
@@ -177,6 +191,9 @@ model ProductOrder {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([sizeProductId])
 }
 
 model Coupon {
@@ -199,6 +216,8 @@ model Payment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([orderId])
 }
 
 //blog section
@@ -223,6 +242,8 @@ model Blog {
   subBlogId Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([subBlogId])
 }
 
 //authentication
