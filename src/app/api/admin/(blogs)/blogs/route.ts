@@ -4,11 +4,12 @@ import { NextResponse } from "next/server";
 import slugify from "slugify";
 
 interface IRequest {
+    id:number;
     title: string;
     image?: string;
     author: string;
     content: string;
-    subBLogId?: number;
+    subBlogId?: number;
 }
 
 
@@ -16,7 +17,7 @@ export const GET = async (request: Request) => {
     try {
         const blogs:any = await prisma.blog.findMany({
             include: {
-                subBLog: true
+                subBlog:true
             }
         });
         return NextResponse.json(blogs);
@@ -31,7 +32,7 @@ export const GET = async (request: Request) => {
 
 export const POST = async (request: Request) => {
 
-    const { title, image, author, content, subBLogId }: IRequest = await request.json();
+    const { title, image, author, content, subBlogId }: IRequest = await request.json();
 
     try {
         const exist: any= await prisma.blog.findFirst({
@@ -52,7 +53,7 @@ export const POST = async (request: Request) => {
                     image,
                     author,
                     content,
-                    subBLogId
+                    subBlogId
                 }
             });
 
@@ -72,7 +73,7 @@ export const POST = async (request: Request) => {
 }
 
 export const PATCH = async (req: Request) => {
-    const { id, title, image, author, content, subBLogId }: IBlogs = await req.json();
+    const { id, title, image, author, content, subBlogId }: IRequest = await req.json();
 
     try {
         await prisma.blog.update({
@@ -85,7 +86,7 @@ export const PATCH = async (req: Request) => {
                 image,
                 author,
                 content,
-                subBLogId
+                subBlogId
             }
         });
 

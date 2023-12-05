@@ -85,7 +85,7 @@ export const PATCH = async (request: NextRequest) => {
             });
 
             return NextResponse.json({
-                message: `DeliveryCost ${areaNameF} has been update successfully`,
+                message: `DeliveryCost ${areaName} has been update successfully`,
                 status: true
             });
         } catch (error: any) {

@@ -1,22 +1,22 @@
 import prisma from "@/utils/connect";
 import { NextResponse } from "next/server";
 
-interface IBlog {
-    id: number;
-    title: string;
-    slug: string;
-    image: string | null;
-    author: string;
-    content: string;
-    subBLogId: number | null;
-}
+// interface IBlog {
+//     id: number;
+//     title: string;
+//     slug: string;
+//     image: string | null;
+//     author: string;
+//     content: string;
+//     subBLogId: number | null;
+// }
 
 export const GET = async (request: Request, { params }: { params: { slug: string } }) => {
 
     try {
-        const blogs: IBlog[] | null = await prisma.blog.findMany({
+        const blogs = await prisma.blog.findMany({
             where: {
-                subBLog: {
+                subBlog: {
                     slug: params.slug
                 }
             }

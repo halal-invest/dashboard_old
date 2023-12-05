@@ -15,8 +15,9 @@ import { get, set } from 'lodash';
 import { NextApiRequest } from 'next';
 
 const rateLimit = 3;
-const rateLimiter = {};
-const rateLimiterMiddleware = (ip) => {
+const rateLimiter: Record<string, number[]> = {}; // Use Record type to define rateLimiter as an object with string keys and number array values
+
+const rateLimiterMiddleware = (ip: string): boolean => {
     const now = Date.now();
     const windowStart = now - 60 * 1000 * 5;
     const requestTimestamps = get(rateLimiter, ip, []).filter((timestamp: number) => timestamp > windowStart);
@@ -35,8 +36,10 @@ export const POST = async (request: Request, req: NextApiRequest) => {
     const { email, password } = await request.json();
     try {
         const ip = requestIp.getClientIp(req);
-        if (!rateLimiterMiddleware(ip)) {
-            return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });
+        if (ip !== null) {
+            if (!rateLimiterMiddleware(ip)) {
+                return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });
+            }
         }
         const cleanInput = {
             email: sanitize(email),

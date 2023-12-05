@@ -96,7 +96,7 @@ export const POST = async (request: NextRequest) => {
                 },
                 deliveryCost: { connect: { id: deliveryCostId } },
                 paymentMethods: { connect: { id: paymentMethodsId } },
-                couponId
+                // couponId
             }
         });
 
@@ -172,7 +172,7 @@ export const PATCH = async (request: NextRequest) => {
                 paymentMethods: {
                     connect: {id: paymentMethodsId}
                 },
-                couponId
+                // couponId
             }
         });
 

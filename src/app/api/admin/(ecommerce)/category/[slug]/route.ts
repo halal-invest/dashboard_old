@@ -5,7 +5,6 @@ interface ICategory {
     id: number,
     title: string,
     slug: string,
-    image: string
 }
 
 export const GET = async (request: Request, { params }: { params: { slug: string } }) => {
