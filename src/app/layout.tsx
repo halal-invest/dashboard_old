@@ -8,6 +8,9 @@ import '../../styles/layout/layout.scss';
 
 import { LayoutProvider } from '../../layout/context/layoutcontext';
 import { ReactQueryProvider } from '@/provider/ReactQueryProvider';
+import { Provider } from 'react-redux';
+import { persistor, store } from '../../store/store';
+import { PersistGate } from 'redux-persist/integration/react';
 
 interface RootLayoutProps {
     children: React.ReactNode;
@@ -20,11 +23,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 <link id="theme-css" href={`/themes/lara-light-indigo/theme.css`} rel="stylesheet"></link>
             </head>
             <body>
-                <ReactQueryProvider>
-                    <PrimeReactProvider>
-                        <LayoutProvider>{children}</LayoutProvider>
-                    </PrimeReactProvider>
-                </ReactQueryProvider>
+            <Provider store={store}>
+                    <PersistGate loading={null} persistor={persistor}>
+                        <ReactQueryProvider>
+                            <PrimeReactProvider>
+                                <LayoutProvider>{children}</LayoutProvider>
+                            </PrimeReactProvider>
+                        </ReactQueryProvider>
+                    </PersistGate>
+                </Provider>
             </body>
         </html>
     );
