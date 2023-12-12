@@ -8,7 +8,6 @@ const MAX_AGE = 60 * 60 * 24 * 7;
 
 import { string, number, object } from 'yup';
 import sanitize from 'sanitize-html';
-import requestIp from 'request-ip';
 import { get, set } from 'lodash';
 import { NextApiRequest } from 'next';
 import axios from 'axios';

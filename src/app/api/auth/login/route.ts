@@ -10,7 +10,6 @@ const REFRESH_TOKEN_AGE = 60 * 60 * 24 * 30;
 
 import { string, number, object, ref } from 'yup';
 import sanitize from 'sanitize-html';
-import requestIp from 'request-ip';
 import { get, set } from 'lodash';
 import { NextApiRequest } from 'next';
 import axios from 'axios';

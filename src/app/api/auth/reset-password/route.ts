@@ -6,7 +6,6 @@ import { FORGOT_PASSWORD_TOKEN_SECRET, IP_ADDRESS_URL, JWT_JOIN_SECRET, JWT_SECR
 import { object, string } from 'yup';
 import sanitize from 'sanitize-html';
 import { get, set } from 'lodash';
-import requestIp from 'request-ip';
 import { NextApiRequest } from 'next';
 import axios from 'axios';
 
