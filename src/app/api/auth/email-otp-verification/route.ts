@@ -21,7 +21,7 @@ const rateLimiterMiddleware = (ip: string): boolean => {
     return requestTimestamps.length <= rateLimit;
 };
 type TokenData = {
-    phone: string;
+    email: string;
     randomNumber: string;
     roles: string[];
     iat: number;
@@ -29,9 +29,9 @@ type TokenData = {
 };
 
 export const POST = async (request: Request) => {
-    const { phone, number, token } = await request.json();
-    let phoneFromToken = '';
-    let numberFromToken = '';
+    const { email, code, token } = await request.json();
+    let emailFromToken = '';
+    let codeFromToken = '';
     try {
         const ipAddress = await axios(IP_ADDRESS_URL);
         const ip = ipAddress.data.userPrivateIpAddress;
@@ -41,31 +41,41 @@ export const POST = async (request: Request) => {
             }
         }
         if (token) {
-            verify(token, JWT_SECRET);
+            verify(token, JWT_JOIN_SECRET);
 
             const decodedToken = decode(token);
-            if (decodedToken && typeof decodedToken === 'object' && 'phone' in decodedToken) {
+            if (decodedToken && typeof decodedToken === 'object' && 'email' in decodedToken) {
                 const tokenData: TokenData = decodedToken as TokenData;
-                phoneFromToken = tokenData?.phone;
-                numberFromToken = tokenData?.randomNumber;
-                console.log(numberFromToken);
+                emailFromToken = tokenData?.email;
+                codeFromToken = tokenData?.randomNumber;
+                console.log(code);
+                console.log(codeFromToken);
 
-                if (phone !== phoneFromToken) {
+                if (email !== emailFromToken) {
                     return NextResponse.json({ message: 'Invalid Request.', status: false });
                 }
-                if (number !== numberFromToken) {
+                if (code !== codeFromToken) {
                     return NextResponse.json({ message: 'Verification Code is not Correct', status: false });
                 }
-                let existUser = await prisma.otpUser.findUnique({
-                    where: { phone }
+                const existUser = await prisma.user.findUnique({
+                    where: { email }
                 });
                 if (!existUser) {
-                    const newOptUser = await prisma.otpUser.create({
-                        data: {
-                            phone: phone
-                        }
-                    });
-                    existUser = newOptUser;
+                    return NextResponse.json({ message: 'This email is not registered yet. Please register first.', status: false });
+                }
+                
+                const verifyUser = await prisma.user.update({
+                    where: {
+                        email: email
+                    },
+                    data: {
+                        verified: true
+                    },
+                    select: {
+                        id:true
+                    }
+                });
+                if(verifyUser){
                     let customerRole = await prisma.role.findFirst({
                         where: {
                             title: 'customer'
@@ -75,48 +85,29 @@ export const POST = async (request: Request) => {
                         }
                     });
                     const userProfile = await prisma.profile.create({
-                        data:{
-                            phone: phone,
-                            optUser: {
-                                connect:{id:newOptUser?.id}
-                            },
-                            roles: {
-                                connect: [{ id: customerRole?.id }]
-                            }
-                            
+                    data:{
+                        email: email,
+                        user: {
+                            connect:{id:verifyUser?.id}
+                        },
+                        roles: {
+                            connect: [{ id: customerRole?.id }]
                         }
-                    })
+                        
+                    }
+                })
+            }
+                if (!verifyUser) {
+                    return NextResponse.json({ message: 'Verification Failed. Something went wrong.', status: false });
                 }
-                
-                cookies().set({
-                    name: 'phone',
-                    value: phone,
-                    httpOnly: true,
-                    path: '/',
-                  })
-                const token = jwt.sign({ phone }, JWT_SECRET, { expiresIn: MAX_AGE });
 
-                const serialized = serialize('jwt', token, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict',
-                    path: '/',
-                    maxAge: MAX_AGE
-                });
- 
-                const userProfile = await prisma.profile.findFirst({
-                    where: { otpUserId: existUser?.id }
-                });
-         
-                return new Response(JSON.stringify({ user: userProfile, message: 'Authenticated', status: true }), {
-                    headers: { 'Set-Cookie': serialized },
-                    status: 200
-                });
+                return NextResponse.json({ message: 'Verified Successfully', status: true });
             }
         } else {
             return NextResponse.json({ message: 'No token submitted.', status: false });
         }
     } catch (error: any) {
-        return NextResponse.json({ message: error?.message, status: false, msg: 'catch error' });
+        console.log(error);
+        return NextResponse.json({ message: error?.message, status: false });
     }
 };
