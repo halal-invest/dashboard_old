@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../../../../utils/constants';
+import { IP_ADDRESS_URL, JWT_SECRET } from '../../../../utils/constants';
 import axios from 'axios';
 const MAX_AGE = 60 * 60 * 24 *30;
 
@@ -33,7 +33,8 @@ const schema = object().shape({
 export const POST = async (request: Request, req: NextApiRequest) => {
     const { phone } = await request.json();
     try {
-        const ip = requestIp.getClientIp(req);
+        const ipAddress = await axios(IP_ADDRESS_URL);
+        const ip = ipAddress.data.userPrivateIpAddress;
         if (ip !== null) {
             if (!rateLimiterMiddleware(ip)) {
                 return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });

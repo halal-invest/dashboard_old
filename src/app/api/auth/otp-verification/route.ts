@@ -2,9 +2,24 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
 import jwt, { decode, verify } from 'jsonwebtoken';
 import { serialize } from 'cookie';
-import { JWT_JOIN_SECRET, JWT_SECRET } from '../../../../utils/constants';
+import { IP_ADDRESS_URL, JWT_JOIN_SECRET, JWT_SECRET } from '../../../../utils/constants';
 const MAX_AGE = 60 * 60 * 24 *30;
 import { cookies } from 'next/headers'
+import { get, set } from 'lodash';
+import axios from 'axios';
+const rateLimit = 3;
+const rateLimiter: Record<string, number[]> = {}; // Use Record type to define rateLimiter as an object with string keys and number array values
+
+const rateLimiterMiddleware = (ip: string): boolean => {
+    const now = Date.now();
+    const windowStart = now - 60 * 1000 * 5;
+    const requestTimestamps = get(rateLimiter, ip, []).filter((timestamp: number) => timestamp > windowStart);
+    requestTimestamps.push(now);
+
+    set(rateLimiter, ip, requestTimestamps);
+
+    return requestTimestamps.length <= rateLimit;
+};
 type TokenData = {
     phone: string;
     randomNumber: string;
@@ -19,6 +34,13 @@ export const POST = async (request: Request) => {
     let phoneFromToken = '';
     let numberFromToken = '';
     try {
+        const ipAddress = await axios(IP_ADDRESS_URL);
+        const ip = ipAddress.data.userPrivateIpAddress;
+        if (ip !== null) {
+            if (!rateLimiterMiddleware(ip)) {
+                return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });
+            }
+        }
         if (token) {
             verify(token, JWT_SECRET);
 

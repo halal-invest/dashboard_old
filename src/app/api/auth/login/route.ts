@@ -3,7 +3,7 @@ import prisma from '../../../../utils/connect';
 import { compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
-import { JWT_SECRET, REFRESH_TOKEN_SECRET } from '../../../../utils/constants';
+import { IP_ADDRESS_URL, JWT_SECRET, REFRESH_TOKEN_SECRET } from '../../../../utils/constants';
 import { cookies } from 'next/headers';
 const ACCESS_TOKEN_AGE = 60 * 60 * 24 * 30;
 const REFRESH_TOKEN_AGE = 60 * 60 * 24 * 30;
@@ -13,6 +13,7 @@ import sanitize from 'sanitize-html';
 import requestIp from 'request-ip';
 import { get, set } from 'lodash';
 import { NextApiRequest } from 'next';
+import axios from 'axios';
 
 const rateLimit = 3;
 const rateLimiter: Record<string, number[]> = {}; // Use Record type to define rateLimiter as an object with string keys and number array values
@@ -35,7 +36,8 @@ const schema = object().shape({
 export const POST = async (request: Request, req: NextApiRequest) => {
     const { email, password } = await request.json();
     try {
-        const ip = requestIp.getClientIp(req);
+        const ipAddress = await axios(IP_ADDRESS_URL);
+        const ip = ipAddress.data.userPrivateIpAddress;
         if (ip !== null) {
             if (!rateLimiterMiddleware(ip)) {
                 return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
 import jwt from 'jsonwebtoken';
-import { FORGOT_PASSWORD_TOKEN_SECRET, JWT_SECRET, URL } from '../../../../utils/constants';
+import { FORGOT_PASSWORD_TOKEN_SECRET, IP_ADDRESS_URL, JWT_SECRET, URL } from '../../../../utils/constants';
 import { sendEmailWithNodemailer } from '@/utils/emails';
 import { object, string } from 'yup';
 import sanitize from 'sanitize-html';
@@ -9,6 +9,7 @@ const MAX_AGE = 60 * 60;
 import { get, set } from 'lodash';
 import requestIp from 'request-ip';
 import { NextApiRequest } from 'next';
+import axios from 'axios';
 
 const rateLimit = 3;
 const rateLimiter: Record<string, number[]> = {}; // Use Record type to define rateLimiter as an object with string keys and number array values
@@ -30,7 +31,8 @@ const schema = object().shape({
 export const POST = async (request: Request, req: NextApiRequest) => {
     const { email } = await request.json();
     try {
-        const ip = requestIp.getClientIp(req);
+        const ipAddress = await axios(IP_ADDRESS_URL);
+        const ip = ipAddress.data.userPrivateIpAddress;
         if (ip !== null) {
             if (!rateLimiterMiddleware(ip)) {
                 return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });
