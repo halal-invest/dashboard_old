@@ -9,7 +9,7 @@ interface Category {
     title: string;
     slug: string;
     media?: { id: number; title: string; url: string; sizeProductId: number | null; categoryId: number | null; subCategoryId: number | null; subSubCategoryId: number | null; createdAt: Date; updatedAt: Date } | null | undefined;
-    imageUrl?: string;
+    imageUrl: string;
 }
 
 export const GET = async (request: NextRequest) => {
@@ -17,10 +17,19 @@ export const GET = async (request: NextRequest) => {
 
     // if (await checkPermission(request, requiredPermission)) {
     try {
-        const categories: Category[] = await prisma.category.findMany({
+        const categories = await prisma.category.findMany({
             include: {
                 media: true,
-                subcategory:true
+                subcategory: {
+                    include: {
+                        subSubCategory: {
+                            include: {
+                                media: true,
+                            }
+                        },
+                        media: true,
+                    }
+                }
             }
         });
         return NextResponse.json(categories);
@@ -40,9 +49,11 @@ export const POST = async (request: NextRequest) => {
     let { title, slug, imageUrl }: Category = await request.json();
     const requiredPermission = 'categories';
 
+
     // if (await checkPermission(request, requiredPermission)) {
     try {
-        const exist: Category | null = await prisma.category.findFirst({
+
+        const exist = await prisma.category.findFirst({
             where: { title }
         });
 
@@ -61,10 +72,10 @@ export const POST = async (request: NextRequest) => {
                     slug: slug
                 }
             });
-            if (imageUrl != null) {
+            if (imageUrl?.trim() !== "") {
                 await prisma.media.create({
                     data: {
-                        title:newCategory?.title,
+                        title: newCategory?.title,
                         url: imageUrl,
                         category: {
                             connect: { id: newCategory?.id }
@@ -103,11 +114,20 @@ export const PATCH = async (request: NextRequest) => {
                 media: true
             }
         });
-        if (imageUrl != null) {
-            if(category?.media === null){
+
+    
+        if (category?.media && imageUrl?.trim() === "") {
+            await prisma.media.delete({
+                where: {
+                    categoryId: category.id,
+                }
+            })
+        }
+        if (imageUrl?.trim() !== "") {
+            if (category?.media === null) {
                 await prisma.media.create({
                     data: {
-                        title:category?.title,
+                        title: category?.title,
                         url: imageUrl,
                         category: {
                             connect: { id: category?.id }
@@ -115,42 +135,39 @@ export const PATCH = async (request: NextRequest) => {
                     }
                 });
             }
-            await prisma.media.update({
-                where: {
-                    id: category?.media?.id
-                },
-                data: {
-                    url: imageUrl
-                }
-            });
+            else {
+                await prisma.media.update({
+                    where: {
+                        id: category?.media?.id
+                    },
+                    data: {
+                        url: imageUrl
+                    }
+                });
+            }
 
         }
+
 
         if (slug === null || slug.trim() === '') {
             slug = slugify(title);
         }
-            await prisma.category.update({
-                where: {
-                    id
-                },
-                data: {
-                    title,
-                    slug: slug
-                }
-            });
-        
+        await prisma.category.update({
+            where: {
+                id
+            },
+            data: {
+                title,
+                slug: slug
+            },
+        });
 
         return NextResponse.json({
             message: `Category ${title} has been update successfully`,
             status: true
         });
     } catch (error: any) {
-        if (error.code == 'P2002') {
-            return NextResponse.json({
-                message: 'Same title already exist. Try again',
-                status: false
-            });
-        }
+        console.log(error);
         return NextResponse.json({
             message: 'Something went wrong',
             status: true
@@ -167,6 +184,17 @@ export const DELETE = async (request: NextRequest) => {
 
     if (await checkPermission(request, requiredPermission)) {
         try {
+
+
+            await prisma.media.deleteMany({
+                where: {
+                    categoryId: {
+                        in: id,
+                    }
+                }
+            });
+
+
             if (id.length > 1) {
                 await prisma.category.deleteMany({
                     where: {

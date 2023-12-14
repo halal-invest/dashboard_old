@@ -83,3 +83,5 @@ export interface ISliderType {
     image: string;
     description: string | null;
 }
+
+

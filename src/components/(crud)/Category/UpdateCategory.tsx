@@ -9,24 +9,24 @@ import SubmitLoading from '@/components/Common/SubmitLoading';
 import UpdateModalButton from '@/components/Common/(Button)/UpdateModalButton';
 import UploadSingleImage from '@/components/Shared/UploadSingleImage';
 import SingleImageRow from '@/components/Shared/SingleImageRow';
+import { URL } from '@/utils/constants';
 
 
-const UpdateCategory = ({ rowSelected, refetch, setRowSelected }:
+const UpdateCategory = ({ rowSelected, setRowSelected }:
     {
         rowSelected: ICategory[] | null,
-        setRowSelected: any,
-        refetch: () => void
+        setRowSelected: any;
     }) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
     const [id, setId] = useState(null);
     const [title, setTitle] = useState<string>("");
-    const [image, setImage] = useState<string>("");
+    const [slug, setSlug] = useState<string>("");
+    const [imageUrl, setImageUrl] = useState<string>("");
 
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const toast = useRef<Toast>(null);
-
 
 
     const updateHandler = async (e: any) => {
@@ -37,11 +37,12 @@ const UpdateCategory = ({ rowSelected, refetch, setRowSelected }:
         try {
 
             const { data } = await axios.patch(
-                "/api/admin/category",
+                `${URL}/api/admin/category`,
                 {
                     id,
                     title,
-                    image
+                    slug,
+                    imageUrl
                 },
             );
 
@@ -51,7 +52,7 @@ const UpdateCategory = ({ rowSelected, refetch, setRowSelected }:
                     detail: `${data.message}`,
                     life: 3000,
                 });
-                refetch();
+
                 setDialog(false);
                 setIsLoading(false);
                 setSubmitted(false);
@@ -75,8 +76,14 @@ const UpdateCategory = ({ rowSelected, refetch, setRowSelected }:
     const confirmUpdate = (rowData: any) => {
         setDialog(true);
         setId(rowData[0].id)
+        setSlug(rowData[0].slug);
         setTitle(rowData[0].title);
-        setImage(rowData[0].image);
+        if (rowData[0].media !== null) {
+            setImageUrl(rowData[0].media?.url);
+        }
+        else {
+            setImageUrl("")
+        }
     };
 
 
@@ -85,7 +92,6 @@ const UpdateCategory = ({ rowSelected, refetch, setRowSelected }:
         setRowSelected([]);
     }
 
-
     return (
 
         <>
@@ -93,7 +99,7 @@ const UpdateCategory = ({ rowSelected, refetch, setRowSelected }:
 
             <Dialog
                 visible={dialog}
-                style={{ width: "400px" }}
+                style={{ width: "600px" }}
                 header="Update Category"
                 modal
                 className="p-fluid"
@@ -102,14 +108,13 @@ const UpdateCategory = ({ rowSelected, refetch, setRowSelected }:
                 <form onSubmit={updateHandler}>
                     <div>
 
-
                         {
-                            image == "" ?
+                            imageUrl === "" ?
                                 <div className="field col-12">
-                                    <UploadSingleImage value={image} setValue={setImage} />
+                                    <UploadSingleImage value={imageUrl} setValue={setImageUrl} />
                                 </div>
-                                : 
-                                <SingleImageRow setValue={setImage} url={image} />
+                                :
+                                <SingleImageRow setValue={setImageUrl} url={imageUrl} />
                         }
                         <div className="field col-12">
                             <CustomInput
@@ -120,8 +125,16 @@ const UpdateCategory = ({ rowSelected, refetch, setRowSelected }:
                                 submitted={submitted}
                             />
                         </div>
+                        <div className="field col-12">
+                            <CustomInput
+                                label="Slug"
+                                value={slug}
+                                setValue={setSlug}
+                                submitted={submitted}
+                            />
+                        </div>
                     </div>
-                    <SubmitLoading isLoading={isLoading} value={[title, image]} />
+                    <SubmitLoading isLoading={isLoading} value={[title]} />
                 </form>
             </Dialog>
 

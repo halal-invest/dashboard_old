@@ -18,9 +18,12 @@ export default function UploadSingleImage({ setValue, value }: { setValue: any, 
         formData.append('file', file);
         formData.append('upload_preset', 'j8mzxmh1');
 
+        console.log(value);
+        
+
         try {
 
-            if (value !== "" ) {
+            if (value.trim() !== "") {
                 return toast.current?.show({
                     severity: 'error',
                     detail: "Already added images",
@@ -103,11 +106,11 @@ export default function UploadSingleImage({ setValue, value }: { setValue: any, 
                     </span>
                 </div>
                 <Tag value={props.formatSize} severity="warning" className="px-3 py-2" />
-                <Button 
-                type="button"
-                 size='small' 
-                 icon="pi pi-times"
-                  className="p-button-outlined p-button-rounded p-button-danger ml-auto" onClick={() => onTemplateRemove(file, props.onRemove)} />
+                <Button
+                    type="button"
+                    size='small'
+                    icon="pi pi-times"
+                    className="p-button-outlined p-button-rounded p-button-danger ml-auto" onClick={() => onTemplateRemove(file, props.onRemove)} />
             </div>
         );
     };

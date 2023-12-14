@@ -8,15 +8,15 @@ import DeleteFooterButtons from '@/components/Common/DeleteFooterButtons';
 import DeleteConfirmContent from '@/components/Common/DeleteConfirmContent';
 import { ICategory } from '@/types/common';
 import DeleteModalButton from '@/components/Common/(Button)/DeleteModalButton';
+import { URL } from '@/utils/constants';
 
 
 interface IProps {
     rowSelected: ICategory[],
     setRowSelected: any,
-    refetch: () => void
 }
 
-const DeleteCategory = ({ rowSelected, refetch, setRowSelected }: IProps) => {
+const DeleteCategory = ({ rowSelected, setRowSelected }: IProps) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
     const [select, setSelect] = useState<ICategory[]>([]);
@@ -25,12 +25,10 @@ const DeleteCategory = ({ rowSelected, refetch, setRowSelected }: IProps) => {
 
     const deleteHandler = async () => {
         setIsLoading(true);
-
         const id = select && select.map((sl: any) => sl.id);
 
-
         try {
-            const { data } = await axios.delete("/api/admin/category", {
+            const { data } = await axios.delete(`${URL}/api/admin/category`, {
                 data: { id }
             });
 
@@ -40,7 +38,6 @@ const DeleteCategory = ({ rowSelected, refetch, setRowSelected }: IProps) => {
                     detail: `${data?.message}`,
                     life: 3000,
                 });
-                refetch();
                 setDialog(false);
                 setIsLoading(false);
                 setRowSelected([]);

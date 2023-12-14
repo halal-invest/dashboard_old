@@ -1,4 +1,5 @@
-"use client"
+
+
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import React, { useRef, useState } from 'react';
@@ -7,15 +8,16 @@ import CustomInput from '@/components/Common/CustomInput';
 import SubmitLoading from '@/components/Common/SubmitLoading';
 import CreateModalButton from '@/components/Common/(Button)/CreateModalButton';
 import UploadSingleImage from '@/components/Shared/UploadSingleImage';
-import { Image } from 'primereact/image';
 import SingleImageRow from '@/components/Shared/SingleImageRow';
+import { URL } from '@/utils/constants';
 
 
-const CreateCategory = ({ refetch }: { refetch: () => void }) => {
+const CreateCategory = () => {
 
     const [dialog, setDialog] = useState<boolean>(false);
     const [title, setTitle] = useState<string>("");
-    const [image, setImage] = useState<string>("");
+    const [slug, setSlug] = useState<string>("");
+    const [imageUrl, setImageUrl] = useState<string>("");
 
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -28,13 +30,12 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
         e.preventDefault();
         setSubmitted(true);
         setIsLoading(true);
-
         try {
-
-            const { data } = await axios.post("/api/admin/category",
+            const { data } = await axios.post(`${URL}/api/admin/category`,
                 {
                     title,
-                    image,
+                    slug,
+                    imageUrl,
                 },
             );
             if (data?.status) {
@@ -44,9 +45,9 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
                     life: 3000,
                 });
 
-                refetch();
                 setTitle("");
-                setImage("");
+                setSlug("");
+                setImageUrl("");
                 setDialog(false);
                 setSubmitted(false);
                 setIsLoading(false);
@@ -71,7 +72,7 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
     const handleHide = () => {
         setDialog(false)
         setTitle("");
-        setImage("");
+        setImageUrl("");
     }
 
     return (
@@ -82,7 +83,7 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
 
             <Dialog
                 visible={dialog}
-                style={{ width: "450px" }}
+                style={{ width: "600px" }}
                 header="Create Category"
                 modal
                 className="p-fluid"
@@ -91,12 +92,12 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
                 <form onSubmit={saveHandler}>
                     <div>
                         {
-                            image == "" ?
+                            imageUrl == "" ?
                                 <div className="field col-12">
-                                    <UploadSingleImage value={image} setValue={setImage} />
+                                    <UploadSingleImage value={imageUrl} setValue={setImageUrl} />
                                 </div>
                                 :
-                                <SingleImageRow setValue={setImage} url={image} />
+                                <SingleImageRow setValue={setImageUrl} url={imageUrl} />
                         }
 
                         <div className="field col-12">
@@ -106,12 +107,22 @@ const CreateCategory = ({ refetch }: { refetch: () => void }) => {
                                 focus={true}
                                 setValue={setTitle}
                                 submitted={submitted}
+                                required={true}
+                            />
+                        </div>
+
+                        <div className="field col-12">
+                            <CustomInput
+                                label="Slug"
+                                value={slug}
+                                setValue={setSlug}
+                                submitted={submitted}
                             />
                         </div>
                     </div>
                     <SubmitLoading
                         isLoading={isLoading}
-                        value={[title, image]}
+                        value={[title]}
                     />
                 </form>
             </Dialog>

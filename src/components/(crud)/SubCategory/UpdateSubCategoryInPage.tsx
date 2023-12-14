@@ -140,7 +140,7 @@ const UpdateSubCategoryInPage = ({ rowSelected, refetch, setRowSelected }: IProp
                             </div>
                         </div>
                     </div>
-                    <SubmitLoading isLoading={isLoading} value={[title, image, category]} />
+                    <SubmitLoading isLoading={isLoading} value={[title, image]} />
                 </form>
             </Dialog>
 

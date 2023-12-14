@@ -137,7 +137,7 @@ const CreateSubCategoryInPage = ({ refetch }: IProps) => {
                                 submitted={submitted}
                             />
                         </div>
-                        <SubmitLoading isLoading={isLoading} value={[title, image, category]} />
+                        <SubmitLoading isLoading={isLoading} value={[title, image]} />
                     </div>
 
                 </form>

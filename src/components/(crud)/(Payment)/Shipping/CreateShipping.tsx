@@ -124,7 +124,7 @@ const CreateShipping = ({ refetch }: { refetch: () => void }) => {
                     </div>
                     <SubmitLoading
                         isLoading={isLoading}
-                        value={[title, cost, description]}
+                        value={[title, description]}
                     />
                 </form>
             </Dialog>
