@@ -20,7 +20,8 @@ const CreateSubCategory = ({ refetch, category }: IProps) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
     const [title, setTitle] = useState<string>("");
-    const [image, setImage] = useState<string>("");
+    const [slug, setSlug] = useState<string>("");
+    const [imageUrl, setImageUrl] = useState<string>("");
     const [categoryId, setCategoryId] = useState<number | null>(null);
 
     const [submitted, setSubmitted] = useState<boolean>(false);
@@ -42,7 +43,7 @@ const CreateSubCategory = ({ refetch, category }: IProps) => {
             const { data } = await axios.post("/api/admin/sub-category",
                 {
                     title,
-                    image,
+                    image: imageUrl,
                     categoryId
                 },
             );
@@ -55,7 +56,7 @@ const CreateSubCategory = ({ refetch, category }: IProps) => {
 
                 refetch();
                 setTitle("");
-                setImage("");
+                setImageUrl("");
                 setDialog(false);
                 setSubmitted(false);
                 setIsLoading(false);
@@ -80,7 +81,7 @@ const CreateSubCategory = ({ refetch, category }: IProps) => {
     const handleHide = () => {
         setDialog(false)
         setTitle("");
-        setImage("");
+        setImageUrl("");
     }
 
     return (
@@ -100,12 +101,12 @@ const CreateSubCategory = ({ refetch, category }: IProps) => {
                 <form onSubmit={saveHandler}>
                     <div>
                         {
-                            image == "" ?
+                            imageUrl == "" ?
                                 <div className="field col-12">
-                                    <UploadSingleImage value={image} setValue={setImage} />
+                                    <UploadSingleImage value={imageUrl} setValue={setImageUrl} />
                                 </div>
                                 :
-                                <SingleImageRow setValue={setImage} url={image} />
+                                <SingleImageRow setValue={setImageUrl} url={imageUrl} />
                         }
                         <div className="field col-12">
                             <CustomInput
@@ -118,7 +119,7 @@ const CreateSubCategory = ({ refetch, category }: IProps) => {
                         </div>
                     </div>
 
-                    <SubmitLoading isLoading={isLoading} value={[title, image]} />
+                    <SubmitLoading isLoading={isLoading} value={[title, imageUrl]} />
                 </form>
             </Dialog>
         </>

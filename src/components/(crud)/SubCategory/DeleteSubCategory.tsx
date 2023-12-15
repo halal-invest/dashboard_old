@@ -5,20 +5,20 @@ import { Toast } from 'primereact/toast';
 import React, { useRef, useState } from 'react';
 import DeleteFooterButtons from '@/components/Common/DeleteFooterButtons';
 import DeleteConfirmContent from '@/components/Common/DeleteConfirmContent';
-import { ISubCategory } from '@/types/common';
+import { IGetSubCategoriesItemType, ISubCategory } from '@/types/common';
 import DeleteModalButton from '@/components/Common/(Button)/DeleteModalButton';
 
 interface IProps {
-    rowSelected: ISubCategory[],
-    setRowSelected: any,
-    refetch: () => void
+    rowSelected: IGetSubCategoriesItemType[];
+    setRowSelected: any;
+    refreshData: any;
 }
 
 
-const DeleteSubCategory = ({ rowSelected, refetch, setRowSelected }: IProps) => {
+const DeleteSubCategory = ({ rowSelected, setRowSelected, refreshData }: IProps) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
-    const [select, setSelect] = useState<ISubCategory[]>([]);
+    const [select, setSelect] = useState<IGetSubCategoriesItemType[]>([]);
     const toast = useRef<Toast>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -39,7 +39,7 @@ const DeleteSubCategory = ({ rowSelected, refetch, setRowSelected }: IProps) => 
                     detail: `${data?.message}`,
                     life: 3000,
                 });
-                refetch();
+                refreshData();
                 setDialog(false);
                 setIsLoading(false);
                 setRowSelected([]);

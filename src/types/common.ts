@@ -85,3 +85,25 @@ export interface ISliderType {
 }
 
 
+
+// working....
+export interface ICreateCategoryItemType {
+    id: number;
+    title: string;
+}
+
+export interface IGetSubCategoriesItemType {
+    id: number;
+    title: string;
+    slug: string;
+    media: {
+        id: number;
+        title: string;
+        url: string;
+        subCategoryId: number | null;
+    } | null;
+    category: {
+        id: number;
+        title: string;
+    };
+}

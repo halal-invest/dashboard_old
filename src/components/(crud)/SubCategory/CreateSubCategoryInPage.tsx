@@ -5,39 +5,31 @@ import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import CustomInput from '@/components/Common/CustomInput';
 import SubmitLoading from '@/components/Common/SubmitLoading';
-import { ICategory } from '@/types/common';
+import { ICategory, ICreateCategoryItemType } from '@/types/common';
 import CreateModalButton from '@/components/Common/(Button)/CreateModalButton';
-import { useQuery } from '@tanstack/react-query';
 import CustomDropDown from '@/components/Common/CustomDropDown';
 import UploadSingleImage from '@/components/Shared/UploadSingleImage';
 import SingleImageRow from '@/components/Shared/SingleImageRow';
+import { Button } from 'primereact/button';
+
 
 interface IProps {
-    refetch: () => void
-}
-
-interface ISelectCategory {
-    id: number
-    title: string;
-    slug: string;
-    image: string;
+    categories: ICreateCategoryItemType[];
+    refreshData?: any;
 }
 
 
-const CreateSubCategoryInPage = ({ refetch }: IProps) => {
+const CreateSubCategoryInPage = ({ categories, refreshData }: IProps) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
     const [title, setTitle] = useState<string>("");
-    const [image, setImage] = useState<string>("");
-    const [category, setCategory] = useState<ISelectCategory | null>(null);
+    const [slug, setSlug] = useState<string>("");
+    const [imageUrl, setImageUrl] = useState<string>("");
+    const [category, setCategory] = useState<ICreateCategoryItemType | null>(null);
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const toast = useRef<Toast>(null);
 
-    const { data: categories, isLoading: categoryLoading } = useQuery({
-        queryKey: ['categories'],
-        queryFn: async () => await axios.get("/api/admin/category")
-    });
 
 
     const saveHandler = async (e: any) => {
@@ -51,7 +43,8 @@ const CreateSubCategoryInPage = ({ refetch }: IProps) => {
             const { data } = await axios.post("/api/admin/sub-category",
                 {
                     title,
-                    image,
+                    slug,
+                    imageUrl,
                     categoryId: category?.id
                 },
             );
@@ -61,10 +54,10 @@ const CreateSubCategoryInPage = ({ refetch }: IProps) => {
                     detail: `${data?.message}`,
                     life: 3000,
                 });
-
-                refetch();
+                refreshData();
                 setTitle("");
-                setImage("");
+                setSlug("");
+                setImageUrl("");
                 setDialog(false);
                 setSubmitted(false);
                 setIsLoading(false);
@@ -89,7 +82,8 @@ const CreateSubCategoryInPage = ({ refetch }: IProps) => {
     const handleHide = () => {
         setDialog(false)
         setTitle("");
-        setImage("");
+        setSlug("");
+        setImageUrl("");
         setCategory(null);
     }
 
@@ -101,8 +95,8 @@ const CreateSubCategoryInPage = ({ refetch }: IProps) => {
 
             <Dialog
                 visible={dialog}
-                style={{ width: "400px" }}
-                header="Create Category"
+                style={{ width: "600px" }}
+                header="Create Sub Category"
                 modal
                 className="p-fluid"
                 onHide={handleHide}
@@ -110,18 +104,28 @@ const CreateSubCategoryInPage = ({ refetch }: IProps) => {
                 <form onSubmit={saveHandler}>
                     <div>
                         {
-                            image == "" ?
+                            imageUrl == "" ?
                                 <div className="field col-12">
-                                    <UploadSingleImage value={image} setValue={setImage} />
+                                    <UploadSingleImage value={imageUrl} setValue={setImageUrl} />
                                 </div>
                                 :
-                                <SingleImageRow setValue={setImage} url={image} />
+                                <SingleImageRow setValue={setImageUrl} url={imageUrl} />
                         }
                         <div className="field col-12">
                             <CustomInput
                                 label="Title"
                                 value={title}
                                 setValue={setTitle}
+                                submitted={submitted}
+                                required={true}
+                            />
+                        </div>
+
+                        <div className="field col-12">
+                            <CustomInput
+                                label="Slug"
+                                value={slug}
+                                setValue={setSlug}
                                 submitted={submitted}
                             />
                         </div>
@@ -135,9 +139,19 @@ const CreateSubCategoryInPage = ({ refetch }: IProps) => {
                                 placeholder='Select a category'
                                 setValue={setCategory}
                                 submitted={submitted}
+                                required={true}
                             />
                         </div>
-                        <SubmitLoading isLoading={isLoading} value={[title, image]} />
+                        <div style={{ marginTop: "30px" }}>
+                            <Button
+                                disabled={!title || !category}
+                                type="submit"
+                                severity="success"
+                                label={isLoading ? "LOADING..." : "SUBMIT"}
+                                size='small'
+                                className="mt-10 p-2"
+                            />
+                        </div>
                     </div>
 
                 </form>

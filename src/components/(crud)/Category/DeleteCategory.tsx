@@ -12,11 +12,12 @@ import { URL } from '@/utils/constants';
 
 
 interface IProps {
-    rowSelected: ICategory[],
-    setRowSelected: any,
+    rowSelected: ICategory[];
+    setRowSelected: any;
+    refreshData: any;
 }
 
-const DeleteCategory = ({ rowSelected, setRowSelected }: IProps) => {
+const DeleteCategory = ({ rowSelected, setRowSelected, refreshData }: IProps) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
     const [select, setSelect] = useState<ICategory[]>([]);
@@ -38,6 +39,7 @@ const DeleteCategory = ({ rowSelected, setRowSelected }: IProps) => {
                     detail: `${data?.message}`,
                     life: 3000,
                 });
+                refreshData();
                 setDialog(false);
                 setIsLoading(false);
                 setRowSelected([]);

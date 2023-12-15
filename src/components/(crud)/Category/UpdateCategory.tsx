@@ -12,10 +12,11 @@ import SingleImageRow from '@/components/Shared/SingleImageRow';
 import { URL } from '@/utils/constants';
 
 
-const UpdateCategory = ({ rowSelected, setRowSelected }:
+const UpdateCategory = ({ rowSelected, setRowSelected, refreshData }:
     {
         rowSelected: ICategory[] | null,
         setRowSelected: any;
+        refreshData: any;
     }) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
@@ -52,7 +53,7 @@ const UpdateCategory = ({ rowSelected, setRowSelected }:
                     detail: `${data.message}`,
                     life: 3000,
                 });
-
+                refreshData();
                 setDialog(false);
                 setIsLoading(false);
                 setSubmitted(false);

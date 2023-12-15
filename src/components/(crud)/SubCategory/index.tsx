@@ -1,43 +1,40 @@
 "use client"
 
+import CreateSubCategoryInPage from '@/components/(crud)/SubCategory/CreateSubCategoryInPage';
+import DeleteSubCategory from '@/components/(crud)/SubCategory/DeleteSubCategory';
+import UpdateSubCategoryInPage from '@/components/(crud)/SubCategory/UpdateSubCategoryInPage';
+import TableHeader from '@/components/Common/TableHeader';
+import { ICreateCategoryItemType, IGetSubCategoriesItemType } from '@/types/common';
+import { useRouter } from 'next/navigation';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { Image } from 'primereact/image';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useRef, useState } from 'react';
-import { ICategory } from '@/types/common';
-import CreateCategory from '@/components/(crud)/Category/CreateCategory';
-import TableHeader from '@/components/Common/TableHeader';
-import DeleteCategory from '@/components/(crud)/Category/DeleteCategory';
-import UpdateCategory from '@/components/(crud)/Category/UpdateCategory';
-import ShowSubCategory from '@/components/(crud)/Category/ShowSubCategory';
-import { Image } from 'primereact/image';
-import { useRouter } from 'next/navigation';
+
 
 interface IProps {
-    categories: any;
+    subCategories: IGetSubCategoriesItemType[];
+    getCategories: ICreateCategoryItemType[]
 }
 
+const MainContextSubCategories = ({ subCategories, getCategories }: IProps) => {
 
-const MainContextCategories = ({ categories }: IProps) => {
-
-    const [selected, setSelected] = useState<ICategory[] | []>([]);
+    const [selected, setSelected] = useState<any>([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const dt = useRef(null);
+
     const router = useRouter();
 
     const refreshData = () => {
         router.refresh();
     }
 
-    // const { data: categories, isLoading, error, refetch } = useCategories();
-    // error && console.log(error);
-
-
     const leftToolbarTemplate = () => {
         return (
             <>
-                <DeleteCategory rowSelected={selected} setRowSelected={setSelected} refreshData={refreshData} />
-                <UpdateCategory rowSelected={selected} setRowSelected={setSelected} refreshData={refreshData} />
+                <DeleteSubCategory rowSelected={selected} setRowSelected={setSelected} refreshData={refreshData} />
+                <UpdateSubCategoryInPage rowSelected={selected} setRowSelected={setSelected} categories={getCategories} refreshData={refreshData} />
             </>
         );
     };
@@ -45,12 +42,10 @@ const MainContextCategories = ({ categories }: IProps) => {
     const rightToolbarTemplate = () => {
         return (
             <>
-                <ShowSubCategory selected={selected} />
-                <CreateCategory refreshData={refreshData} />
+                <CreateSubCategoryInPage categories={getCategories} refreshData={refreshData} />
             </>
         );
     };
-
 
     const imageBodyTemplate = (rowData: any) => {
         return (
@@ -69,6 +64,7 @@ const MainContextCategories = ({ categories }: IProps) => {
     };
 
 
+
     return (
         <div className="grid crud-demo">
             <div className="col-12">
@@ -81,7 +77,7 @@ const MainContextCategories = ({ categories }: IProps) => {
 
                     <DataTable
                         ref={dt}
-                        value={categories}
+                        value={subCategories}
                         selection={selected}
                         onSelectionChange={(e) => setSelected(e.value as any)}
                         dataKey="id"
@@ -90,10 +86,10 @@ const MainContextCategories = ({ categories }: IProps) => {
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Categories"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Category"
                         globalFilter={globalFilter}
                         emptyMessage="No Category found."
-                        header={<TableHeader data={categories} setGlobalFilter={setGlobalFilter} title='Categories' />}
+                        header={<TableHeader data={subCategories} setGlobalFilter={setGlobalFilter} title='Sub Categories' />}
                         responsiveLayout="scroll"
                     >
                         <Column
@@ -102,9 +98,8 @@ const MainContextCategories = ({ categories }: IProps) => {
                         />
                         <Column
                             field="id"
-                            header="ID"
-                            sortable
-                            body={(rowData) => rowData.id}
+                            header="CODE"
+                            sortable body={(rowData) => rowData.id}
                             headerStyle={{ minWidth: '5rem' }}
                         />
                         <Column
@@ -112,7 +107,7 @@ const MainContextCategories = ({ categories }: IProps) => {
                             header="IMAGE"
                             sortable
                             body={imageBodyTemplate}
-                            headerStyle={{ minWidth: "5rem" }}
+                            headerStyle={{ minWidth: "10rem" }}
                         />
 
                         <Column
@@ -120,14 +115,23 @@ const MainContextCategories = ({ categories }: IProps) => {
                             header="TITLE"
                             sortable
                             body={(rowData) => rowData?.title}
-                            headerStyle={{ minWidth: "15rem" }}
+                            headerStyle={{ minWidth: "20rem" }}
+                        />
+                        <Column
+                            field="category.title"
+                            header="CATEGORY"
+                            sortable
+                            body={(rowData) => rowData?.category?.title}
+                            headerStyle={{ minWidth: "20rem" }}
                         />
 
                     </DataTable>
+
+
                 </div>
             </div>
         </div>
     );
 };
 
-export default MainContextCategories;
+export default MainContextSubCategories;

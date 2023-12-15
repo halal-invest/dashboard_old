@@ -23,7 +23,7 @@ const CustomDropDown = ({ label, placeholder, value, required, setValue, submitt
                 id={label}
                 value={value}
                 optionLabel={optionSelected}
-                options={data?.data}
+                options={data}
                 placeholder={placeholder}
                 autoFocus={focus}
                 onChange={(e) => setValue(e.value)}

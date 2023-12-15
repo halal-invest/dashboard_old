@@ -12,7 +12,7 @@ import SingleImageRow from '@/components/Shared/SingleImageRow';
 import { URL } from '@/utils/constants';
 
 
-const CreateCategory = () => {
+const CreateCategory = ({ refreshData }: { refreshData: any }) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
     const [title, setTitle] = useState<string>("");
@@ -44,7 +44,7 @@ const CreateCategory = () => {
                     detail: `${data?.message}`,
                     life: 3000,
                 });
-
+                refreshData();
                 setTitle("");
                 setSlug("");
                 setImageUrl("");
