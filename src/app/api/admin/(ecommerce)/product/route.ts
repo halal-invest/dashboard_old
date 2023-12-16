@@ -1,3 +1,4 @@
+import { IGetProductsItemsTypes } from '@/types/common';
 import { checkPermission } from '@/utils/checkPermissions';
 import prisma from '@/utils/connect';
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,84 +12,67 @@ interface Product {
     season?: string | null;
     subCategoryId?: number | null;
     subSubCategoryId?: number | null;
+    isActive?: boolean;
 }
 
 export const GET = async (request: NextRequest) => {
     const requiredPermission = 'products';
 
-    if (await checkPermission(request, requiredPermission)) {
-        try {
-            const products: Product[] = await prisma.product.findMany();
-            return NextResponse.json(products);
-        } catch (error) {
-            return NextResponse.json({
-                status: false,
-                error,
-                message: 'Something went wrong !'
-            });
-        }
-    } else {
-        return NextResponse.json(null, { status: 200 });
-    }
-};
-
-export const POST = async (request: NextRequest) => {
-    let { title, slug, sku, season,subCategoryId, subSubCategoryId }: Product = await request.json();
-    const requiredPermission = 'products';
-
     // if (await checkPermission(request, requiredPermission)) {
-        try {
-            const exist: Product | null = await prisma.product.findFirst({
-                where: { title }
-            });
-
-            if (exist) {
-                return NextResponse.json({
-                    status: false,
-                    message: `${title} already exist. Try again!`
-                });
-            } else {
-                if (slug === null || slug.trim() === '') {
-                    slug = slugify(title);
-                }
-                await prisma.product.create({
-                    data: {
-                        title,
-                        slug,
-                        sku,
-                        season,
-                        subCategoryId,
-                        subSubCategoryId
+    try {
+        const products: IGetProductsItemsTypes[] = await prisma.product.findMany({
+            where: {
+                isActive: true,
+            },
+            include: {
+                subCategory: {
+                    select: {
+                        id: true,
+                        title: true,
                     }
-                });
-
-                return NextResponse.json({
-                    status: true,
-                    message: `Product ${title} has been created successfully`
-                });
+                },
+                subSubCategory: {
+                    select: {
+                        id: true,
+                        title: true,
+                    }
+                }
             }
-        } catch (error) {
-            return NextResponse.json({
-                status: false,
-                error,
-                message: 'Something went wrong !'
-            });
-        }
+        });
+        return NextResponse.json(products);
+    } catch (error) {
+        return NextResponse.json({
+            status: false,
+            error,
+            message: 'Something went wrong !'
+        });
+    }
     // } else {
-    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    //     return NextResponse.json(null, { status: 200 });
     // }
 };
 
-export const PATCH = async (request: NextRequest) => {
-    let { id, title, slug, sku, season, subCategoryId, subSubCategoryId }: Product = await request.json();
+export const POST = async (request: NextRequest) => {
+    let { title, slug, sku, season, subCategoryId, subSubCategoryId }: Product = await request.json();
     const requiredPermission = 'products';
 
-    if (await checkPermission(request, requiredPermission)) {
-        try {
-            await prisma.product.update({
-                where: {
-                    id
-                },
+    // if (await checkPermission(request, requiredPermission)) {
+    try {
+        const exist: Product | null = await prisma.product.findFirst({
+            where: { title, subCategoryId, subSubCategoryId }
+        });
+
+        if (exist) {
+            return NextResponse.json({
+                status: false,
+                message: `${title} already exist. Try again!`
+            });
+        }
+        else {
+            if (slug === null || slug.trim() === '') {
+                slug = slugify(title);
+            }
+            await prisma.product.create({
                 data: {
                     title,
                     slug,
@@ -100,70 +84,102 @@ export const PATCH = async (request: NextRequest) => {
             });
 
             return NextResponse.json({
-                message: `Product ${title} has been update successfully`,
-                status: true
-            });
-        } catch (error: any) {
-            if (error.code == 'P2002') {
-                return NextResponse.json({
-                    message: 'Same title already exist. Try again',
-                    status: false
-                });
-            }
-            return NextResponse.json({
-                message: 'Something went wrong',
-                status: true
+                status: true,
+                message: `Product ${title} has been created successfully`
             });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    } catch (error) {
+        return NextResponse.json({
+            status: false,
+            error,
+            message: 'Something went wrong !'
+        });
     }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
+};
+
+export const PATCH = async (request: NextRequest) => {
+    let { id, title, slug, sku, season, subCategoryId, subSubCategoryId, isActive }: Product = await request.json();
+    // const requiredPermission = 'products';
+
+    // if (await checkPermission(request, requiredPermission)) {
+    try {
+        await prisma.product.update({
+            where: {
+                id
+            },
+            data: {
+                title,
+                slug,
+                sku,
+                season,
+                isActive,
+                subCategoryId,
+                subSubCategoryId
+            }
+        });
+
+        return NextResponse.json({
+            message: `Product ${title} has been update successfully`,
+            status: true
+        });
+    } catch (error: any) {
+
+        if (error.code == 'P2002') {
+            return NextResponse.json({
+                message: 'Same title already exist. Try again',
+                status: false
+            });
+        }
+        return NextResponse.json({
+            message: 'Something went wrong',
+            status: true
+        });
+    }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
 
 export const DELETE = async (request: NextRequest) => {
     const { id }: { id: number[] } = await request.json();
-    const requiredPermission = 'products';
+    // const requiredPermission = 'products';
 
-    if (await checkPermission(request, requiredPermission)) {
-        try {
-            if (id.length > 1) {
-                await prisma.product.deleteMany({
-                    where: {
-                        id: {
-                            in: id
-                        }
+    // if (await checkPermission(request, requiredPermission)) {
+    try {
+        if (id.length > 1) {
+            await prisma.product.deleteMany({
+                where: {
+                    id: {
+                        in: id
                     }
-                });
-                return NextResponse.json({
-                    message: 'products Delete has been successfully',
-                    status: true
-                });
-            } else {
-                await prisma.product.delete({
-                    where: {
-                        id: id[0]
-                    }
-                });
-                return NextResponse.json({
-                    message: 'Product Delete has been successfully',
-                    status: true
-                });
-            }
-        } catch (error: any) {
-            if (error.code === 'P2003') {
-                return NextResponse.json({
-                    message: "Child value has existed, don't delete this product",
-                    status: false
-                });
-            } else {
-                return NextResponse.json({
-                    message: 'Something went wrong',
-                    error,
-                    status: false
-                });
-            }
+                }
+            });
+            return NextResponse.json({
+                message: 'products Delete has been successfully',
+                status: true
+            });
+        } else {
+            await prisma.product.delete({
+                where: {
+                    id: id[0]
+                }
+            });
+            return NextResponse.json({
+                message: 'Product Delete has been successfully',
+                status: true
+            });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    } catch (error: any) {
+        return NextResponse.json({
+            message: 'Something went wrong',
+            error,
+            status: false
+        });
     }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };

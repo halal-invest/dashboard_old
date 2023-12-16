@@ -130,3 +130,26 @@ export interface IGetSubSubCategoriesItemsType {
     createdAt: Date;
     updatedAt: Date;
 }
+
+
+export interface IGetProductsItemsTypes {
+    subSubCategory: {
+        id: number;
+        title: string;
+    } | null;
+    subCategory: {
+        id: number;
+        title: string;
+    } | null;
+    id: number;
+    title: string;
+    slug: string;
+    sku: string | null;
+    season: string | null;
+    subSubCategoryId: number | null;
+    subCategoryId: number | null;
+    isActive: boolean;
+    isDeleted: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}

@@ -1,7 +1,7 @@
 import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import React from 'react';
+import ResetFormButton from '../Shared/ResetFormButton';
 
 interface IProps {
     label: string,
@@ -13,12 +13,19 @@ interface IProps {
     optionSelected: string;
     data: any;
     required?: boolean;
+    reset?: boolean;
 }
 
-const CustomDropDown = ({ label, placeholder, value, required, setValue, submitted, focus, optionSelected, data }: IProps) => {
+const CustomDropDown = ({ label, placeholder, value, required, setValue,
+    submitted, focus, optionSelected, data, reset }: IProps) => {
     return (
         <>
-            <label htmlFor={label}> {label} </label>
+            <div className='flex justify-content-between'>
+                <label htmlFor={label}>
+                    {label}
+                </label>
+                <span> {reset && <ResetFormButton setHandler={setValue} />} </span>
+            </div>
             <Dropdown
                 id={label}
                 value={value}
@@ -35,8 +42,7 @@ const CustomDropDown = ({ label, placeholder, value, required, setValue, submitt
             {!submitted && !value && (
                 <small
                     style={{ fontSize: "1rem", color: "red" }}
-                    className="p-invalid"
-                >
+                    className="p-invalid" >
                     {required && `${label} is required.`}
                 </small>
             )}
