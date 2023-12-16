@@ -91,6 +91,10 @@ export interface ICreateCategoryItemType {
     id: number;
     title: string;
 }
+export interface ICreateSubCategoryItemType {
+    id: number;
+    title: string;
+}
 
 export interface IGetSubCategoriesItemType {
     id: number;
@@ -106,4 +110,23 @@ export interface IGetSubCategoriesItemType {
         id: number;
         title: string;
     };
+}
+
+export interface IGetSubSubCategoriesItemsType {
+    subCategory: {
+        id: number;
+        title: string;
+    };
+    media: {
+        id: number;
+        title: string;
+        url: string;
+        subSubCategoryId: number | null;
+    } | null;
+    id: number;
+    title: string;
+    slug: string;
+    subCategoryId: number;
+    createdAt: Date;
+    updatedAt: Date;
 }

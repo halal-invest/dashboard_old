@@ -20,6 +20,7 @@ const AppMenu = () => {
             items: [
                 { label: 'Categories', icon: 'pi pi-fw pi-id-card', to: '/categories' },
                 { label: 'Sub Categories', icon: 'pi pi-fw pi-id-card', to: '/sub-categories' },
+                { label: 'Sub Sub Categories', icon: 'pi pi-fw pi-id-card', to: '/sub-sub-categories' },
                 { label: 'Products', icon: 'pi pi-fw pi-id-card', to: '/products' },
                 { label: 'Blogs', icon: 'pi pi-fw pi-id-card', to: '/blogs' },
                 { label: 'Sub Blogs', icon: 'pi pi-fw pi-id-card', to: '/sub-blogs' },

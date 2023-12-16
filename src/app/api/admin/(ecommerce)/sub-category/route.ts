@@ -24,7 +24,7 @@ interface IRequest {
 export const GET = async (request: NextRequest) => {
     const requiredPermission = 'categories';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             const subCategories: IGetSubCategoriesItemType[] = await prisma.subCategory.findMany({
                 select: {
@@ -55,16 +55,14 @@ export const GET = async (request: NextRequest) => {
                 message: 'Something went wrong !'
             });
         }
-    } else {
-        return NextResponse.json(null, { status: 200 });
-    }
+    // } else {
+    //     return NextResponse.json(null, { status: 200 });
+    // }
 };
 
 export const POST = async (request: NextRequest) => {
     let { title, slug, imageUrl, categoryId }: IRequest = await request.json();
     const requiredPermission = 'categories';
-
-    console.log(categoryId);
 
 
     // if (await checkPermission(request, requiredPermission)) {
