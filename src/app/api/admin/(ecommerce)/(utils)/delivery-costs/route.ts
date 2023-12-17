@@ -11,7 +11,7 @@ interface DeliveryCost {
 export const GET = async (request: NextRequest) => {
     const requiredPermission = 'delivery-costs';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             const deliverycosts: DeliveryCost[] = await prisma.deliveryCost.findMany();
             return NextResponse.json(deliverycosts);
@@ -22,16 +22,16 @@ export const GET = async (request: NextRequest) => {
                 message: 'Something went wrong !'
             });
         }
-    } else {
-        return NextResponse.json(null, { status: 200 });
-    }
+    // } else {
+    //     return NextResponse.json(null, { status: 200 });
+    // }
 };
 
 export const POST = async (request: NextRequest) => {
     let { areaName, cost }: DeliveryCost = await request.json();
     const requiredPermission = 'delivery-costs';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             const exist: DeliveryCost | null = await prisma.deliveryCost.findFirst({
                 where: { areaName }
@@ -62,16 +62,16 @@ export const POST = async (request: NextRequest) => {
                 message: 'Something went wrong !'
             });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
 
 export const PATCH = async (request: NextRequest) => {
     let { id, areaName ,cost}: DeliveryCost = await request.json();
     const requiredPermission = 'delivery-costs';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             await prisma.deliveryCost.update({
                 where: {
@@ -100,16 +100,16 @@ export const PATCH = async (request: NextRequest) => {
                 status: true
             });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
 
 export const DELETE = async (request: NextRequest) => {
     const { id }: { id: number[] } = await request.json();
     const requiredPermission = 'delivery-costs';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             if (id.length > 1) {
                 await prisma.deliveryCost.deleteMany({
@@ -148,7 +148,7 @@ export const DELETE = async (request: NextRequest) => {
                 });
             }
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };

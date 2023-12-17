@@ -153,3 +153,8 @@ export interface IGetProductsItemsTypes {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface ISizedType {
+    id: number;
+    title: string;
+}

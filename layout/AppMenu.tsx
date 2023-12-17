@@ -22,13 +22,13 @@ const AppMenu = () => {
                 { label: 'Sub Categories', icon: 'pi pi-fw pi-id-card', to: '/sub-categories' },
                 { label: 'Sub Sub Categories', icon: 'pi pi-fw pi-id-card', to: '/sub-sub-categories' },
                 { label: 'Products', icon: 'pi pi-fw pi-id-card', to: '/products' },
+                { label: 'Sizes', icon: 'pi pi-fw pi-id-card', to: '/size' },
                 { label: 'Blogs', icon: 'pi pi-fw pi-id-card', to: '/blogs' },
                 { label: 'Sub Blogs', icon: 'pi pi-fw pi-id-card', to: '/sub-blogs' },
                 { label: 'Orders', icon: 'pi pi-fw pi-id-card', to: '/orders' },
                 { label: 'Profile', icon: 'pi pi-fw pi-id-card', to: '/profile' },
                 { label: 'Users', icon: 'pi pi-fw pi-id-card', to: '/users' },
                 { label: 'Coupons', icon: 'pi pi-fw pi-id-card', to: '/coupons' },
-
             ]
         },
         {

@@ -11,7 +11,7 @@ interface Color {
 export const GET = async (request: NextRequest) => {
     const requiredPermission = 'colors';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             const colors: Color[] = await prisma.color.findMany();
             return NextResponse.json(colors);
@@ -22,16 +22,16 @@ export const GET = async (request: NextRequest) => {
                 message: 'Something went wrong !'
             });
         }
-    } else {
-        return NextResponse.json(null, { status: 200 });
-    }
+    // } else {
+    //     return NextResponse.json(null, { status: 200 });
+    // }
 };
 
 export const POST = async (request: NextRequest) => {
     let { title, colorCode }: Color = await request.json();
     const requiredPermission = 'colors';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             const exist: Color | null = await prisma.color.findFirst({
                 where: { title }
@@ -62,16 +62,16 @@ export const POST = async (request: NextRequest) => {
                 message: 'Something went wrong !'
             });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
 
 export const PATCH = async (request: NextRequest) => {
     let { id, title, colorCode }: Color = await request.json();
     const requiredPermission = 'colors';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             await prisma.color.update({
                 where: {
@@ -99,16 +99,16 @@ export const PATCH = async (request: NextRequest) => {
                 status: true
             });
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
 
 export const DELETE = async (request: NextRequest) => {
     const { id }: { id: number[] } = await request.json();
     const requiredPermission = 'colors';
 
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             if (id.length > 1) {
                 await prisma.color.deleteMany({
@@ -147,7 +147,7 @@ export const DELETE = async (request: NextRequest) => {
                 });
             }
         }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
+    // } else {
+    //     return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+    // }
 };
