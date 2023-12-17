@@ -1,13 +1,13 @@
-"use client"
-import { Button } from 'primereact/button';
+
 import axios from 'axios';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import React, { useRef, useState } from 'react';
 import DeleteFooterButtons from '@/components/Common/DeleteFooterButtons';
 import DeleteConfirmContent from '@/components/Common/DeleteConfirmContent';
-import { ICategory, IPaymentMethodType } from '@/types/common';
+import { IPaymentMethodType } from '@/types/common';
 import DeleteModalButton from '@/components/Common/(Button)/DeleteModalButton';
+import { URL } from '@/utils/constants';
 
 
 interface IProps {
@@ -30,7 +30,7 @@ const DeletePaymentMethod = ({ rowSelected, refetch, setRowSelected }: IProps) =
 
 
         try {
-            const { data } = await axios.delete("/api/admin/payment-method", {
+            const { data } = await axios.delete(`${URL}/api/admin/payment-method`, {
                 data: { id }
             });
 

@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
 import Layout from '../../../layout/layout';
-// import Layout from '../../../layout/layout';
-
 
 interface AppLayoutProps {
     children: React.ReactNode;
@@ -15,7 +13,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: 'website',
         title: 'E-commerce',
-        url: 'https://sakai.primereact.org/',
+        url: 'https://dashboard-theta-indol.vercel.app/',
         description: "Shop the best deals online! Explore a wide range of products and enjoy secure, hassle-free shopping with fast delivery. Join us today!",
         images: ['https://www.primefaces.org/static/social/sakai-react.png'],
         ttl: 604800

@@ -1,43 +1,35 @@
 "use client"
-import TableHeader from '@/components/Common/TableHeader';
-import { ISizedType } from '@/types/common';
-import { useRouter, useSearchParams } from 'next/navigation';
+
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useRef, useState } from 'react';
-import DeleteSize from './DeleteSize';
-import CreateSize from './CreateSize';
-import UpdateSize from './UpdateSize';
-import { Button } from 'primereact/button';
-import Link from 'next/link';
+import { IPaymentMethodType } from '@/types/common';
+import TableHeader from '@/components/Common/TableHeader';
+import CreatePaymentMethod from '@/components/(crud)/(Payment)/PaymentMethod/CreatePaymentMethod';
+import DeletePaymentMethod from '@/components/(crud)/(Payment)/PaymentMethod/DeletePaymentMethod';
+import UpdatePaymentMethod from '@/components/(crud)/(Payment)/PaymentMethod/UpdatePaymentMethod';
+import { useRouter } from 'next/navigation';
 
 
-interface IProps {
-    sizes: ISizedType[];
-}
-
-const MainContextSize = ({ sizes }: IProps) => {
+const MainContextPaymentMethod = ({ paymentMethods }: { paymentMethods: IPaymentMethodType[] }) => {
 
     const [selected, setSelected] = useState<any>([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const dt = useRef(null);
 
     const router = useRouter();
-    const searchParams = useSearchParams();
-
-    const page = searchParams.get("page") ?? "1"
-    const per_page = searchParams.get("per_page") ?? "5"
 
     const refreshData = () => {
         router.refresh();
     }
 
+
     const leftToolbarTemplate = () => {
         return (
             <>
-                <DeleteSize rowSelected={selected} setRowSelected={setSelected} refreshData={refreshData} />
-                <UpdateSize rowSelected={selected} setRowSelected={setSelected} refreshData={refreshData} />
+                <DeletePaymentMethod rowSelected={selected} refetch={refreshData} setRowSelected={setSelected} />
+                <UpdatePaymentMethod refetch={refreshData} rowSelected={selected} setRowSelected={setSelected} />
             </>
         );
     };
@@ -45,11 +37,7 @@ const MainContextSize = ({ sizes }: IProps) => {
     const rightToolbarTemplate = () => {
         return (
             <>
-                <CreateSize refreshData={refreshData} />
-                <Link href={`/sizes?page=${Number(page+1)}&per_page=${per_page}`}>
-                    Pagination
-                </Link>
-
+                <CreatePaymentMethod refetch={refreshData} />
             </>
         );
     };
@@ -67,7 +55,7 @@ const MainContextSize = ({ sizes }: IProps) => {
 
                     <DataTable
                         ref={dt}
-                        value={sizes}
+                        value={paymentMethods}
                         selection={selected}
                         onSelectionChange={(e) => setSelected(e.value as any)}
                         dataKey="id"
@@ -76,35 +64,39 @@ const MainContextSize = ({ sizes }: IProps) => {
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Sub sub Category"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} payment method"
                         globalFilter={globalFilter}
-                        emptyMessage="No Sub Sub Category found."
-                        header={<TableHeader data={sizes} setGlobalFilter={setGlobalFilter} title='Sizes' />}
+                        emptyMessage="No payment method found."
+                        header={<TableHeader data={paymentMethods} setGlobalFilter={setGlobalFilter} title='Payment Methods' />}
                         responsiveLayout="scroll"
                     >
                         <Column
                             selectionMode="multiple"
                             headerStyle={{ width: '5rem' }}
                         />
-                        <Column
-                            field="id"
-                            header="CODE"
-                            sortable body={(rowData) => rowData.id}
-                            headerStyle={{ minWidth: '5rem' }}
-                        />
 
                         <Column
                             field="title"
                             header="TITLE"
                             sortable
-                            body={(rowData) => rowData?.title}
-                            headerStyle={{ minWidth: "20rem" }}
+                            body={(rowData) => rowData.title}
+                            headerStyle={{ minWidth: "15rem" }}
                         />
+
+                        <Column
+                            field="description"
+                            header="DESCRIPTION"
+                            sortable
+                            body={(rowData) => rowData.description}
+                            headerStyle={{ minWidth: "15rem" }}
+                        />
+
                     </DataTable>
+
                 </div>
             </div>
         </div>
     );
 };
 
-export default MainContextSize;
+export default MainContextPaymentMethod;

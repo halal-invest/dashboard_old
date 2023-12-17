@@ -1,25 +1,24 @@
-"use client"
 import axios from 'axios';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import React, { useRef, useState } from 'react';
-import { ICategory, IPaymentMethodType } from '@/types/common';
+import { IPaymentMethodType } from '@/types/common';
 import CustomInput from '@/components/Common/CustomInput';
 import SubmitLoading from '@/components/Common/SubmitLoading';
 import UpdateModalButton from '@/components/Common/(Button)/UpdateModalButton';
-import UploadSingleImage from '@/components/Shared/UploadSingleImage';
-import SingleImageRow from '@/components/Shared/SingleImageRow';
+import { URL } from '@/utils/constants';
+
 
 
 const UpdatePaymentMethod = ({ rowSelected, refetch, setRowSelected }:
     {
-        rowSelected: IPaymentMethodType[] | null,
+        rowSelected: IPaymentMethodType[],
         setRowSelected: any,
         refetch: () => void
     }) => {
 
     const [dialog, setDialog] = useState<boolean>(false);
-    const [id, setId] = useState(null);
+    const [id, setId] = useState<number | null>(null);
     const [title, setTitle] = useState<string>("");
     const [description, setDescription] = useState<string>("");
 
@@ -37,7 +36,7 @@ const UpdatePaymentMethod = ({ rowSelected, refetch, setRowSelected }:
         try {
 
             const { data } = await axios.patch(
-                "/api/admin/payment-method",
+                `${URL}/api/admin/payment-method`,
                 {
                     id,
                     title,
@@ -72,7 +71,7 @@ const UpdatePaymentMethod = ({ rowSelected, refetch, setRowSelected }:
         }
     }
 
-    const confirmUpdate = (rowData: any) => {
+    const confirmUpdate = (rowData: IPaymentMethodType[]) => {
         setDialog(true);
         setId(rowData[0].id)
         setTitle(rowData[0].title);

@@ -15,7 +15,7 @@ interface IPatch extends IRequest {
 
 export const GET = async (request: Request) => {
     try {
-        const paymentMethods: IPaymentMethodType[] = await prisma.paymentMethod.findMany();
+        const paymentMethods: IPaymentMethodType[] = await prisma.paymentMethod.findMany({});
         return NextResponse.json(paymentMethods);
     } catch (error) {
         return NextResponse.json({
