@@ -1,22 +1,22 @@
 export interface ICategory {
-    id: number,
-    title: string,
-    slug: string
-    image: string,
+    id: number;
+    title: string;
+    slug: string;
+    image: string;
 }
 
 export interface ISubCategory {
-    id: number,
-    title: string,
-    slug: string
-    image: string,
-    categoryId: number,
+    id: number;
+    title: string;
+    slug: string;
+    image: string;
+    categoryId: number;
     category?: {
-        id: number,
-        title: string,
-        slug: string,
-        image: string
-    }
+        id: number;
+        title: string;
+        slug: string;
+        image: string;
+    };
 }
 
 export interface ISubBlogs {
@@ -84,8 +84,6 @@ export interface ISliderType {
     description: string | null;
 }
 
-
-
 // working....
 export interface ICreateCategoryItemType {
     id: number;
@@ -131,7 +129,6 @@ export interface IGetSubSubCategoriesItemsType {
     updatedAt: Date;
 }
 
-
 export interface IGetProductsItemsTypes {
     subSubCategory: {
         id: number;
@@ -157,4 +154,9 @@ export interface IGetProductsItemsTypes {
 export interface ISizedType {
     id: number;
     title: string;
+}
+export interface IDeliveryCostType {
+    id: number;
+    areaName: string;
+    cost: string;
 }

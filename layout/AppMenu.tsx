@@ -29,6 +29,7 @@ const AppMenu = () => {
                 { label: 'Profile', icon: 'pi pi-fw pi-id-card', to: '/profile' },
                 { label: 'Users', icon: 'pi pi-fw pi-id-card', to: '/users' },
                 { label: 'Coupons', icon: 'pi pi-fw pi-id-card', to: '/coupons' },
+                { label: 'Delivery Costs', icon: 'pi pi-fw pi-id-card', to: '/delivery-costs' }
             ]
         },
         {
@@ -36,7 +37,6 @@ const AppMenu = () => {
             icon: 'pi pi-fw pi-briefcase',
             to: '/pages',
             items: [
-
                 {
                     label: 'Site Info',
                     icon: 'pi pi-fw pi-circle-off',
@@ -66,11 +66,9 @@ const AppMenu = () => {
                     label: 'Coupon Banner',
                     icon: 'pi pi-fw pi-calendar',
                     to: '/coupon-banner'
-                },
-
+                }
             ]
-        },
-
+        }
     ];
 
     return (
