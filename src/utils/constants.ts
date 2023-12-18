@@ -5,3 +5,7 @@ export const FORGOT_PASSWORD_TOKEN_SECRET = "74fe2be9d0ee352956fa4e66a6a8b72da59
 
 export const URL = process.env.NODE_ENV === "production" ? "https://dashboard-theta-indol.vercel.app" : "http://localhost:3000"
 export const IP_ADDRESS_URL = "https://ip-address-xn83.onrender.com/getUserPrivateIpAddress";
+
+export const RATE_LIMIT = 10;
+export const RATE_LIMIT_TIME = 60 * 1000 * 10;
+export const RATE_LIMIT_TIME_MIN = 10;

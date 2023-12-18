@@ -2,19 +2,19 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
 import { hash, compare } from 'bcrypt';
 import jwt, { decode, verify } from 'jsonwebtoken';
-import { FORGOT_PASSWORD_TOKEN_SECRET, IP_ADDRESS_URL, JWT_JOIN_SECRET, JWT_SECRET } from '../../../../utils/constants';
+import { FORGOT_PASSWORD_TOKEN_SECRET, IP_ADDRESS_URL, JWT_JOIN_SECRET, JWT_SECRET, RATE_LIMIT, RATE_LIMIT_TIME, RATE_LIMIT_TIME_MIN } from '../../../../utils/constants';
 import { object, string } from 'yup';
 import sanitize from 'sanitize-html';
 import { get, set } from 'lodash';
 import { NextApiRequest } from 'next';
 import axios from 'axios';
 
-const rateLimit = 3;
+const rateLimit = RATE_LIMIT;
 const rateLimiter: Record<string, number[]> = {}; // Use Record type to define rateLimiter as an object with string keys and number array values
 
 const rateLimiterMiddleware = (ip: string): boolean => {
     const now = Date.now();
-    const windowStart = now - 60 * 1000 * 5;
+    const windowStart = now - RATE_LIMIT_TIME;
     const requestTimestamps = get(rateLimiter, ip, []).filter((timestamp: number) => timestamp > windowStart);
     requestTimestamps.push(now);
 
@@ -42,7 +42,7 @@ export const POST = async (request: Request, req:NextApiRequest) => {
             const ip = ipAddress.data.userPrivateIpAddress;
             if (ip !== null) {
                 if (!rateLimiterMiddleware(ip)) {
-                    return NextResponse.json({ message: 'Too Many Requests. Try agian after 5 minutes.' });
+                    return NextResponse.json({ message: `Too Many Requests. Try again ${RATE_LIMIT_TIME_MIN} after  minutes.`, status: false });
                 }
             }
             const cleanInput = {
