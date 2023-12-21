@@ -48,9 +48,9 @@ export const POST = async (request: NextRequest, req: NextApiRequest) => {
 
         const existUser = await prisma.user.findFirst({
             where: { email },
-            select: { verified: true }
+            select: { email_verified: true }
         });
-        if (existUser?.verified) {
+        if (existUser?.email_verified) {
             return NextResponse.json({ message: 'User with this email already exists. Try with a new email.' });
         }
         const randomNumber = Math.floor(100000 + Math.random() * 900000);
@@ -74,7 +74,7 @@ export const POST = async (request: NextRequest, req: NextApiRequest) => {
                 data: {
                     email,
                     password: hashedPassword,
-                    verified: false
+                    email_verified: false
                 }
             });
         }

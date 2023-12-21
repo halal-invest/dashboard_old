@@ -26,42 +26,42 @@ export const POST = async (request: Request) => {
                 if (email !== emailFromToken) {
                     return NextResponse.json({ message: 'Verification link was sent to a different email address.', status: false });
                 }
-                const existUser = await prisma.user.findUnique({
+                const existUser = await prisma.user.findFirst({
                     where: { email }
                 });
                 if (!existUser) {
                     return NextResponse.json({ message: 'This email is not registered yet. Please register first.', status: false });
                 }
-                
+                let investorRole = await prisma.role.findFirst({
+                    where: {
+                        title: 'investor'
+                    },
+                    select: {
+                        id: true
+                    }
+                });
                 const verifyUser = await prisma.user.update({
                     where: {
-                        email: email
+                        id: existUser?.id
                     },
                     data: {
-                        verified: true
+                        email_verified: true,
+                        roles: {
+                            connect: [{ id: investorRole?.id }]
+                        }
                     },
                     select: {
                         id:true
                     }
                 });
                 if(verifyUser){
-                    let customerRole = await prisma.role.findFirst({
-                        where: {
-                            title: 'customer'
-                        },
-                        select: {
-                            id: true
-                        }
-                    });
+                   
                     const userProfile = await prisma.profile.create({
                     data:{
-                        email: email,
                         user: {
                             connect:{id:verifyUser?.id}
                         },
-                        roles: {
-                            connect: [{ id: customerRole?.id }]
-                        }
+                       
                         
                     }
                 })

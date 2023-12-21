@@ -4,7 +4,7 @@ import { hash } from 'bcrypt';
 
 export const GET = async (request: NextRequest) => {
     try {
-        const adminCount = await prisma.profile.count({
+        const adminCount = await prisma.user.count({
             where: {
                 roles: {
                     some: {
@@ -23,7 +23,7 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
     const { email, password } = await request.json();
     try {
-        const adminCount = await prisma.profile.count({
+        const adminCount = await prisma.user.count({
             where: {
                 roles: {
                     some: {
@@ -39,15 +39,16 @@ export const POST = async (request: NextRequest) => {
         const users_managePermission = await prisma.permission.create({
             data: {
                 title: "users_manage",
-                description: "allow users manage"
+                description: "allow users management"
             }
         })
-        const defaultPermission = await prisma.permission.create({
+        const investorPermission = await prisma.permission.create({
             data: {
-                title: "default_permission",
-                description: "customers default permission"
+                title: "investment",
+                description: "default permission"
             }
         })
+
         const adminRole = await prisma.role.create({
             data: {
                 title: 'admin',
@@ -58,47 +59,36 @@ export const POST = async (request: NextRequest) => {
 
             }
         })
-        const customerRole = await prisma.role.create({
+        const investorRole = await prisma.role.create({
             data: {
-                title: 'customer',
-                description: 'customer',
+                title: 'investor',
+                description: 'investor',
                 permissions: {
-                    connect: [{id: defaultPermission.id}]
+                    connect: [{id: investorPermission.id}]
                 }
 
             }
         })
+       
 
             const hashedPassword = await hash(password, 10);
             const adminUser = await prisma.user.create({
                 data: {
                     email,
                     password: hashedPassword,
-                    // roles: {
-                    //     connect: [{id:adminRole.id}]
-                    // },
-                    verified:true
+                    roles: {
+                        connect: [{id:adminRole.id}]
+                    },
+                    email_verified:true
                 },
                 select:{
                     id:true
                 }
-                // include: {
-                //     roles: true
-                // }
             });
-            await prisma.profile.create({
-                data: {
-                    name:"Admin",
-                    user:{
-                        connect: {id:adminUser?.id}
-                    },
-                    roles:{
-                        connect: {id:adminRole?.id}
-                    }
-                }
-            })
+           
         return NextResponse.json({ message: 'Admin created successfully', status: true });
     } catch (error) {
+        console.log(error);
         return NextResponse.json({ message: error, status: 500 });
     }
 };

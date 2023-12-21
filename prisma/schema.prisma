@@ -8,233 +8,6 @@ datasource db {
   relationMode = "prisma"
 }
 
-//completed
-model Category {
-  id          Int           @id @default(autoincrement())
-  title       String
-  slug        String        @unique
-  media       Media?
-  subcategory SubCategory[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-}
-
-//completed
-model SubCategory {
-  id             Int              @id @default(autoincrement())
-  title          String
-  slug           String           @unique
-  media          Media?
-  category       Category         @relation(fields: [categoryId], references: [id])
-  categoryId     Int
-  subSubCategory SubSubCategory[]
-  products       Product[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-
-  @@index([categoryId])
-}
-
-//completed
-model SubSubCategory {
-  id            Int         @id @default(autoincrement())
-  title         String
-  slug          String      @unique
-  media         Media?
-  subCategoryId Int
-  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
-  products      Product[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  @@index([subCategoryId])
-}
-
-//completed
-model Product {
-  id               Int             @id @default(autoincrement())
-  title            String
-  slug             String          @unique
-  sku              String?         @unique
-  season           String?
-  subSubCategoryId Int?
-  subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
-  sizeProducts     SizeProduct[]
-  subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
-  subCategoryId    Int?
-  isActive         Boolean         @default(true)
-  isDeleted        Boolean         @default(false)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-
-  @@index([subSubCategoryId])
-  @@index([subCategoryId])
-}
-
-model Media {
-  id               Int             @id @default(autoincrement())
-  title            String
-  url              String
-  sizeProductId    Int?
-  sizeProduct      SizeProduct?    @relation(fields: [sizeProductId], references: [id])
-  categoryId       Int?            @unique
-  category         Category?       @relation(fields: [categoryId], references: [id])
-  subCategoryId    Int?            @unique
-  subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
-  subSubCategoryId Int?            @unique
-  subSubCategory   SubSubCategory? @relation(fields: [subSubCategoryId], references: [id])
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-
-  @@index([sizeProductId])
-}
-
-//completed
-model Size {
-  id           Int           @id @default(autoincrement())
-  title        String
-  sizeProducts SizeProduct[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
-
-//completed
-model PaymentMethod {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  orders      Order[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// nazmul bhai
-model DeliveryCost {
-  id        Int      @id @default(autoincrement())
-  areaName  String
-  cost      String
-  orders    Order[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// nazmul bhai
-model Color {
-  id           Int           @id @default(autoincrement())
-  title        String
-  colorCode    String
-  sizeProducts SizeProduct[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
-
-//sajib
-model SizeProduct {
-  id               Int            @id @default(autoincrement())
-  productId        Int
-  product          Product        @relation(fields: [productId], references: [id])
-  sizeId           Int
-  size             Size           @relation(fields: [sizeId], references: [id])
-  stock            Float?
-  price            Float
-  originalPrice    Float
-  images           Media[]
-  shortDescription String         @db.Text
-  description      String?        @db.Text
-  bestDeal         Boolean        @default(false)
-  discountedSale   Boolean        @default(false)
-  colors           Color[]
-  ProductOrder     ProductOrder[]
-  isActive         Boolean        @default(true)
-  isDeleted        Boolean        @default(false)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-
-  @@index([productId])
-  @@index([sizeId])
-}
-
-//sajib
-model Order {
-  id           Int            @id @default(autoincrement())
-  name         String
-  email        String
-  phone        String
-  address      String
-  city         String         @default("Dhaka")
-  country      String?        @default("Bangladesh")
-  postal_code  String?
-  productOrder ProductOrder[]
-  profile      Profile        @relation(fields: [profileId], references: [id])
-  profileId    Int
-  subTotal     String
-  total        String
-
-  paymentMethods     PaymentMethod @relation(fields: [paymentMethodsId], references: [id])
-  paymentMethodsId   Int
-  transactionPhoneNo String?
-  transactionNo      String?
-
-  couponId Int?
-  coupon   Coupon? @relation(fields: [couponId], references: [id])
-
-  deliveryCostId Int
-  deliveryCost   DeliveryCost @relation(fields: [deliveryCostId], references: [id])
-  paymentStatus  String       @default("unpaid") //unpaid, paid
-  orderStatus    String       @default("pending") //pending, received, ready_to_ship, delivered, cancelled
-
-  payments Payment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([profileId])
-  @@index([paymentMethodsId])
-  @@index([couponId])
-  @@index([deliveryCostId])
-}
-
-//sajib
-model ProductOrder {
-  id            Int         @id @default(autoincrement())
-  orderId       Int
-  order         Order       @relation(fields: [orderId], references: [id])
-  sizeProductId Int
-  sizeProduct   SizeProduct @relation(fields: [sizeProductId], references: [id])
-  price         Float
-  quantity      Float
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([orderId])
-  @@index([sizeProductId])
-}
-
-model Coupon {
-  id         Int       @id @default(autoincrement())
-  title      String
-  amount     Float?
-  percentage Float?
-  isActive   Boolean
-  validDate  DateTime?
-  order      Order[]
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-}
-
-model Payment {
-  id      Int    @id @default(autoincrement())
-  orderId Int?
-  order   Order? @relation(fields: [orderId], references: [id])
-  amount  Float
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([orderId])
-}
-
 //blog section
 model SubBLog {
   id        Int      @id @default(autoincrement())
@@ -273,61 +46,66 @@ model Permission {
 model Role {
   id          Int          @id @unique @default(autoincrement())
   title       String       @unique
-  description String
+  description String?
   permissions Permission[]
-  profiles    Profile[]
+  // profiles    Profile[]
   isActive    Boolean      @default(true)
   isDeleted   Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  users       User[]
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String?  @unique
-  password  String?
-  verified  Boolean  @default(false)
-  profile   Profile?
-  isActive  Boolean  @default(true)
-  isDeleted Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  id             Int     @id @default(autoincrement())
+  email          String?
+  email_verified Boolean @default(false)
+  password       String?
 
-model OtpUser {
-  id        Int      @id @default(autoincrement())
-  phone     String   @unique
-  profile   Profile?
-  isActive  Boolean  @default(true)
-  isDeleted Boolean  @default(false)
+  phone          String?
+  phone_verified Boolean @default(false)
+
+  isActive  Boolean @default(true)
+  isDeleted Boolean @default(false)
+  roles     Role[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Profile   Profile?
+  
 }
 
 model Profile {
-  id          Int      @id @default(autoincrement())
-  userId      Int?     @unique
-  user        User?    @relation(fields: [userId], references: [id])
-  otpUserId   Int?     @unique
-  optUser     OtpUser? @relation(fields: [otpUserId], references: [id])
-  name        String?
-  email       String?
-  phone       String?
-  roles       Role[]
-  address     String?
-  city        String?  @default("Dhaka")
-  country     String?  @default("Bangladesh")
-  postal_code String?
-  orders      Order[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
+  id                   Int     @id @default(autoincrement())
+  user_id              Int     @unique
+  user                 User    @relation(fields: [user_id], references: [id])
+  personal_photo       String?
+  father_name          String?
+  job_title            String?
+  dob                  String?
+  address              String?
+  city                 String? @default("Dhaka")
+  country              String? @default("Bangladesh")
+  postal_code          String?
+  facebook_profile     String?
+  whatsapp_no          String?
+  repayment_method     String?
+  nid                  String?
+  nominee_nid          String?
+  nominee_name         String?
+  nominee_phone        String?
+  gender               String?
+  
+  bank_name            String?
+  account_no           String?
+  account_holders_name String?
+  branch_name          String?
+  routing_no           String?
+  district             String?
+  bkash_no             String?
 
-model Shipping {
-  id          Int    @id @default(autoincrement())
-  title       String @unique
-  cost        Int
-  description String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SiteInfo {
@@ -337,11 +115,5 @@ model SiteInfo {
   email       String? @unique
   phone       String?
   address     String?
-  description String?
-}
-
-model Slider {
-  id          Int     @id @default(autoincrement())
-  image       String
   description String?
 }

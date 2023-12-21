@@ -48,7 +48,7 @@ export const POST = async (request: Request, req: NextApiRequest) => {
         };
         await schema.validate(cleanInput);
 
-        const existUser: any = await prisma.user.findUnique({
+        const existUser: any = await prisma.user.findFirst({
             where: { email },
             select: {
                 password: true,
@@ -89,8 +89,14 @@ export const POST = async (request: Request, req: NextApiRequest) => {
             // const userProfile = await prisma.profile.findFirst({
             //     where: { id: existUser?.id }
             // });
+            const userInfo = {
+                id: existUser?.id,
+                email: existUser?.email,
+                roles: existUser?.roles,
+                verified: existUser?.email_verified
+            }
 
-            return new Response(JSON.stringify({ message: 'login successful', token: token, status: true }), {
+            return new Response(JSON.stringify({ message: 'login successful',user: userInfo, token: token, status: true }), {
                 headers: { 'Set-Cookie': serialized },
                 status: 200
             });

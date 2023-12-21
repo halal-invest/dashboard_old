@@ -56,33 +56,37 @@ export const POST = async (request: Request) => {
                 if (number !== numberFromToken) {
                     return NextResponse.json({ message: 'Verification Code is not Correct', status: false });
                 }
-                let existUser = await prisma.otpUser.findUnique({
+                let existUser = await prisma.user.findFirst({
                     where: { phone }
                 });
+               
                 if (!existUser) {
-                    const newOptUser = await prisma.otpUser.create({
-                        data: {
-                            phone: phone
-                        }
-                    });
-                    existUser = newOptUser;
-                    let customerRole = await prisma.role.findFirst({
+                    let investorRole = await prisma.role.findFirst({
                         where: {
-                            title: 'customer'
+                            title: 'investor'
                         },
                         select: {
                             id: true
                         }
                     });
+                    const newOptUser = await prisma.user.create({
+                        data: {
+                            phone: phone,
+                            roles: {
+                                connect: [{ id: investorRole?.id }]
+                            }
+                        },
+                       
+                    });
+                    existUser = newOptUser;
+                   
                     const userProfile = await prisma.profile.create({
                         data:{
-                            phone: phone,
-                            optUser: {
+                       
+                            user: {
                                 connect:{id:newOptUser?.id}
                             },
-                            roles: {
-                                connect: [{ id: customerRole?.id }]
-                            }
+                           
                             
                         }
                     })
@@ -104,11 +108,9 @@ export const POST = async (request: Request) => {
                     maxAge: MAX_AGE
                 });
  
-                const userProfile = await prisma.profile.findFirst({
-                    where: { otpUserId: existUser?.id }
-                });
+                
          
-                return new Response(JSON.stringify({ user: userProfile, message: 'Authenticated', status: true }), {
+                return new Response(JSON.stringify({ message: 'Authenticated', user: existUser, status: true }), {
                     headers: { 'Set-Cookie': serialized },
                     status: 200
                 });

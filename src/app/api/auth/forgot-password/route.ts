@@ -41,7 +41,7 @@ export const POST = async (request: Request, req: NextApiRequest) => {
             email: sanitize(email)
         };
         await schema.validate(cleanInput);
-        const existUser: any = await prisma.user.findUnique({
+        const existUser: any = await prisma.user.findFirst({
             where: { email },
             select: {
                 password: true,
