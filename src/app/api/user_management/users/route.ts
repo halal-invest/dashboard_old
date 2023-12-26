@@ -9,8 +9,10 @@ export const GET = async (request: NextRequest) => {
             const users = await prisma.user.findMany({
                 select: {
                     id: true,
-                    verified: true,
+                    email_verified: true,
                     email: true,
+                    phone: true,
+                    phone_verified: true,
                     createdAt: true,
                     updatedAt: true,
                     isActive: true,
@@ -26,48 +28,52 @@ export const GET = async (request: NextRequest) => {
     }
 };
 
-export const POST = async (request: NextRequest) => {
-    const requiredPermission = 'users_manage';
+// export const POST = async (request: NextRequest) => {
+//     const requiredPermission = 'users_manage';
 
-    const { email, password, roles } = await request.json();
-    if (await checkPermission(request, requiredPermission)) {
-        try {
-            const existUser = await prisma.user.findUnique({
-                where: { email }
-            });
+//     const { email, password, roles } = await request.json();
+//     if (await checkPermission(request, requiredPermission)) {
+//         try {
+//             const existUser = await prisma.user.findFirst({
+//                 where: { email },
 
-            if (existUser) {
-                return NextResponse.json({ message: 'User exists with this email.', status: false });
-            } else {
-                const hashedPassword = await hash(password, 10);
-                const newUser = await prisma.user.create({
-                    data: {
-                        email,
-                        password: hashedPassword,
-                        verified: true
-                    }
-                });
+//             });
+//             const existUserPhone = await prisma.user.findFirst({
+//                 where: { phone }
+//             });
 
-                const newProfile = await prisma.profile.create({
-                    data: {
-                        user: {
-                            connect: { id: newUser?.id }
-                        },
-                        email: email,
-                        roles: {
-                            connect: roles.map((roleId: any) => ({ id: roleId }))
-                        }
-                    }
-                });
-                return NextResponse.json({ message: 'user created successfully', status: true });
-            }
-        } catch (error) {
-            return NextResponse.json({ message: error, status: 500 });
-        }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
-};
+//             if (existUser) {
+//                 return NextResponse.json({ message: 'User exists with this email.', status: false });
+//             } else {
+//                 const hashedPassword = await hash(password, 10);
+//                 const newUser = await prisma.user.create({
+//                     data: {
+//                         email,
+//                         password: hashedPassword,
+//                         verified: true
+//                     }
+//                 });
+
+//                 const newProfile = await prisma.profile.create({
+//                     data: {
+//                         user: {
+//                             connect: { id: newUser?.id }
+//                         },
+//                         email: email,
+//                         roles: {
+//                             connect: roles.map((roleId: any) => ({ id: roleId }))
+//                         }
+//                     }
+//                 });
+//                 return NextResponse.json({ message: 'user created successfully', status: true });
+//             }
+//         } catch (error) {
+//             return NextResponse.json({ message: error, status: 500 });
+//         }
+//     } else {
+//         return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+//     }
+// };
 
 export const PUT = async (request: NextRequest) => {
     const requiredPermission = 'users_manage';
@@ -75,26 +81,38 @@ export const PUT = async (request: NextRequest) => {
     let hashedPassword;
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const { id, password, email, roles, isActive } = await request.json();
+            const { id, password, email, phone, roles, isActive } = await request.json();
 
             const existingUser = await prisma.user.findUnique({
                 where: {
                     id: id
-                }
+                },
+                include: { roles: true }
             });
             const existProfile = await prisma.profile.findFirst({
                 where: {
-                    userId: existingUser?.id
-                },
-                include: {
-                    roles: true
+                    user_id: existingUser?.id
                 }
             });
             if (password) {
                 hashedPassword = await hash(password, 10);
-            } else {
+            }
+            if (!password) {
                 hashedPassword = existingUser?.password;
             }
+            const existUserPhone = await prisma.user.findFirst({
+                where: { phone }
+            });
+            const existUserEmail = await prisma.user.findFirst({
+                where: { email }
+            });
+            if (existUserEmail) {
+                return NextResponse.json({ message: 'User exists with this email.', status: false });
+            }
+            if (existUserPhone) {
+                return NextResponse.json({ message: 'User exists with this phone.', status: false });
+            }
+
             const updatedUser = prisma.user.update({
                 where: {
                     id: id
@@ -102,14 +120,10 @@ export const PUT = async (request: NextRequest) => {
                 data: {
                     password: hashedPassword,
                     email,
-                    isActive
-                }
-            });
-            await prisma.profile.update({
-                where: { id: existProfile?.id },
-                data: {
+                    phone,
+                    isActive,
                     roles: {
-                        disconnect: existProfile?.roles,
+                        disconnect: existingUser?.roles,
                         connect: roles.map((roleId: any) => ({ id: roleId }))
                     }
                 }
@@ -136,10 +150,10 @@ export const DELETE = async (request: NextRequest) => {
 
     const { id } = await request.json();
     console.log(id);
-    const defaultUser = await prisma.user.findUnique({
-        where: {email: "alarafatsiddique@gmail.com"}
+    const defaultUser = await prisma.user.findFirst({
+        where: { email: 'alarafatsiddique@gmail.com' }
     });
-  
+
     const deleteOrNot = id.includes(defaultUser?.id);
     console.log(deleteOrNot);
     if (await checkPermission(request, requiredPermission)) {
