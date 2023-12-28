@@ -3,9 +3,9 @@ import prisma from '../../../../utils/connect';
 import jwt, { decode, verify } from 'jsonwebtoken';
 import { serialize } from 'cookie';
 import { IP_ADDRESS_URL, JWT_JOIN_SECRET, JWT_SECRET, RATE_LIMIT, RATE_LIMIT_TIME, RATE_LIMIT_TIME_MIN } from '../../../../utils/constants';
-const MAX_AGE = 60 * 60 * 24 *30;
-import { cookies } from 'next/headers'
-import { get, set } from 'lodash';
+const MAX_AGE = 60 * 60 * 24 * 30;
+import { cookies } from 'next/headers';
+import { get, set, update } from 'lodash';
 import axios from 'axios';
 const rateLimit = RATE_LIMIT;
 const rateLimiter: Record<string, number[]> = {}; // Use Record type to define rateLimiter as an object with string keys and number array values
@@ -57,9 +57,26 @@ export const POST = async (request: Request) => {
                     return NextResponse.json({ message: 'Verification Code is not Correct', status: false });
                 }
                 let existUser = await prisma.user.findFirst({
-                    where: { phone }
+                    where: { phone },
+                    select: {
+                        id: true,
+                        phone: true,
+                        phone_verified: true,
+                        email: true,
+                        email_verified: true,
+                        name: true,
+                        whatapp: true,
+                        address: true,
+                        roles: true
+                    }
                 });
-               
+                const update_status = await prisma.user.update({
+                    where: { id: existUser?.id },
+                    data: {
+                        phone_verified: true
+                    }
+                });
+
                 if (!existUser) {
                     let investorRole = await prisma.role.findFirst({
                         where: {
@@ -74,30 +91,38 @@ export const POST = async (request: Request) => {
                             phone: phone,
                             roles: {
                                 connect: [{ id: investorRole?.id }]
-                            }
+                            },
+                            phone_verified: true
                         },
-                       
+                        select: {
+                            id: true,
+                            phone: true,
+                            phone_verified: true,
+                            email: true,
+                            email_verified: true,
+                            name: true,
+                            whatapp: true,
+                            address: true,
+                            roles: true
+                        }
                     });
                     existUser = newOptUser;
-                   
+
                     const userProfile = await prisma.profile.create({
-                        data:{
-                       
+                        data: {
                             user: {
-                                connect:{id:newOptUser?.id}
-                            },
-                           
-                            
+                                connect: { id: newOptUser?.id }
+                            }
                         }
-                    })
+                    });
                 }
-                
+
                 cookies().set({
                     name: 'phone',
                     value: phone,
                     httpOnly: true,
-                    path: '/',
-                  })
+                    path: '/'
+                });
                 const token = jwt.sign({ phone }, JWT_SECRET, { expiresIn: MAX_AGE });
 
                 const serialized = serialize('jwt', token, {
@@ -107,10 +132,19 @@ export const POST = async (request: Request) => {
                     path: '/',
                     maxAge: MAX_AGE
                 });
- 
-                
-         
-                return new Response(JSON.stringify({ message: 'Authenticated', user: existUser, status: true }), {
+
+                const userInfo = {
+                    id: existUser?.id,
+                    name: existUser?.name,
+                    whatsapp: existUser?.whatapp,
+                    address: existUser?.address,
+                    email: existUser?.email,
+                    phone: existUser?.phone,
+                    roles: existUser?.roles,
+                    email_verified: existUser?.email_verified,
+                    phone_verified: existUser?.phone_verified
+                };
+                return new Response(JSON.stringify({ message: 'Authenticated', user: userInfo, status: true }), {
                     headers: { 'Set-Cookie': serialized },
                     status: 200
                 });

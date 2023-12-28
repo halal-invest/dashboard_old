@@ -1,21 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
-import { hash } from 'bcrypt';
 import { checkPermission } from '@/utils/checkPermissions';
-import { disconnect } from 'process';
+import { checkPermissionAndUser } from '@/utils/checkPermissionAndUser';
+
+
 export const GET = async (request: NextRequest) => {
-    const requiredPermission = 'users_manage';
-    if (await checkPermission(request, requiredPermission)) {
+    const { searchParams } = new URL(request.url);
+    const user_id_from_params = searchParams.get('userId');
+    console.log(user_id_from_params);
+    const admin_permission = 'users_manage';
+    const investor_permission = 'investment';
+
     try {
-        const profiles = await prisma.profile.findMany({
-            include: { roles: true }
-        });
-        return NextResponse.json(profiles, { status: 200 });
+        if (await checkPermission(request, admin_permission)) {
+            if (user_id_from_params) {
+                const user_profile = await prisma.profile.findFirst({
+                    where: {
+                        user_id: +user_id_from_params
+                    }
+                });
+                return NextResponse.json(user_profile, { status: 200 });
+            }
+            const profiles = await prisma.profile.findMany();
+            return NextResponse.json(profiles, { status: 200 });
+        }
+        if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
+            const user_profile = await prisma.profile.findFirst({
+                where: {
+                    user_id: +user_id_from_params
+                }
+            });
+            return NextResponse.json(user_profile, { status: 200 });
+        }
+        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
     } catch (error) {
-        return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
-    }
-    } else {
-        return NextResponse.json(null, { status: 200 });
+        return NextResponse.json(error);
     }
 };
 
@@ -64,155 +83,211 @@ export const GET = async (request: NextRequest) => {
 // };
 
 export const PUT = async (request: NextRequest) => {
-    const requiredPermission = 'users_manage';
+    let {
+        id,
+        name,
+        personal_photo,
+        father_name,
+        job_title,
+        dob,
+        facebook_profile,
+        whatsapp_no,
+        repayment_method,
+        nid,
+        account_holders_name,
+        branch_name,
+        routing_no,
+        district,
+        bkash_no,
+        nominee_nid,
+        nominee_name,
+        nominee_phone,
+        gender,
+        bank_name,
+        account_no,
+        address,
+        city,
+        country,
+        postal_code
+    } = await request.json();
+    const { searchParams } = new URL(request.url);
+    const user_id_from_params = searchParams.get('userId');
+    const investor_permission = 'investment';
+    const admin_permission = 'users_manage';
 
-    let hashedPassword;
-    if (await checkPermission(request, requiredPermission)) {
     try {
-        let { id, name, email, phone, roles, address, city, country, postal_code } = await request.json();
-
-        const existProfile = await prisma.profile.findFirst({
-            where: {
-                id: id
-            },
-            include: {
-                roles: true
-            }
-        });
-
-        if (existProfile?.userId === null) {
-            phone = existProfile.phone;
-        }
-        if (existProfile?.otpUserId === null) {
-            email = existProfile.email;
-        }
-
-        const updatedProfile = await prisma.profile.update({
-            where: { id: existProfile?.id },
-            data: {
-                name: name,
-                email: email,
-                phone: phone,
-                address: address,
-                postal_code: postal_code,
-                city: city,
-                country: country,
-                roles: {
-                    disconnect: existProfile?.roles,
-                    connect: roles.map((roleId: any) => ({ id: roleId }))
-                }
-            }
-        });
-
-        return NextResponse.json({
-            message: `profile ${name} has been updated successfully`,
-            status: true
-        });
-        // return NextResponse.json({name, phone})
-    } catch (error) {
-        return NextResponse.json({ message: error }, { status: 500 });
-    }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-    }
-};
-
-export const DELETE = async (request: NextRequest) => {
-    const requiredPermission = 'users_manage';
-    const { id } = await request.json();
-    const defaultUserIdObjects = await prisma.profile.findMany({
-        where: {
-            email: {
-                in: ['alarafatsiddique@gmail.com']
-            }
-        },
-        select: {
-            id: true
-        }
-    });
-    const defaultUserIds = defaultUserIdObjects.map((obj) => obj.id);
-    const deleteOrNot = defaultUserIds.some((item) => id.includes(item));
-    if (await checkPermission(request, requiredPermission)) {
-    try {
-        if (id.length > 1) {
-            if (deleteOrNot) {
-                return NextResponse.json({
-                    message: `default users cannot be deleted.`,
-                    status: false
-                });
-            }
-
-            for (let i = 0; i < id.length; i++) {
-                const profile = await prisma.profile.findFirst({
-                    where: {
-                        id: id[i]
-                    }
-                });
-                //for phone-otp user
-                if (profile?.otpUserId !== null) {
-                    await prisma.otpUser.delete({
-                        where: { id: profile?.otpUserId }
-                    });
-                    await prisma.profile.delete({
-                        where: { id: profile?.id }
-                    });
-                }
-                //for email-password user
-                if (profile?.userId !== null) {
-                    await prisma.user.delete({
-                        where: { id: profile?.userId }
-                    });
-                    await prisma.profile.delete({
-                        where: { id: profile?.id }
-                    });
-                }
-            }
-
-            return NextResponse.json({
-                message: 'Profiles Delete has been successfully',
-                status: true
-            });
-        } else {
-            if (deleteOrNot) {
-                return NextResponse.json({
-                    message: `default users cannot be deleted.`,
-                    status: false
-                });
-            }
-            const profile = await prisma.profile.findFirst({
-                where: {
-                    id: id[0]
+        if (await checkPermission(request, admin_permission)) {
+            const updatedProfile = await prisma.profile.update({
+                where: { id: id },
+                data: {
+                    personal_photo,
+                    father_name,
+                    job_title,
+                    dob,
+                    address,
+                    city,
+                    country,
+                    postal_code,
+                    facebook_profile,
+                    whatsapp_no,
+                    nid,
+                    repayment_method,
+                    nominee_name,
+                    nominee_nid,
+                    nominee_phone,
+                    gender,
+                    bank_name,
+                    account_no,
+                    account_holders_name,
+                    branch_name,
+                    routing_no,
+                    district,
+                    bkash_no
                 }
             });
-            //for phone-otp user
-            if (profile?.otpUserId !== null) {
-                await prisma.otpUser.delete({
-                    where: { id: profile?.otpUserId }
-                });
-                await prisma.profile.delete({
-                    where: { id: profile?.id }
-                });
-            }
-            //for email-password user
-            if (profile?.userId !== null) {
-                await prisma.user.delete({
-                    where: { id: profile?.userId }
-                });
-                await prisma.profile.delete({
-                    where: { id: profile?.id }
-                });
-            }
 
             return NextResponse.json({
-                message: 'Profiles Delete has been successfully',
+                message: `profile has been updated successfully`,
                 status: true
             });
         }
+        if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
+            const updatedProfile = await prisma.profile.update({
+                where: { user_id: +user_id_from_params },
+                data: {
+                    personal_photo,
+                    father_name,
+                    job_title,
+                    dob,
+                    address,
+                    city,
+                    country,
+                    postal_code,
+                    facebook_profile,
+                    whatsapp_no,
+                    nid,
+                    repayment_method,
+                    nominee_name,
+                    nominee_nid,
+                    nominee_phone,
+                    gender,
+                    bank_name,
+                    account_no,
+                    account_holders_name,
+                    branch_name,
+                    routing_no,
+                    district,
+                    bkash_no
+                }
+            });
+
+            return NextResponse.json({
+                message: `profile has been updated successfully`,
+                status: true
+            });
+        }
+
+        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
     } catch (error) {
         return NextResponse.json({ message: error }, { status: 500 });
     }
-    } else {
-        return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-
-    }
 };
+
+// export const DELETE = async (request: NextRequest) => {
+//     const requiredPermission = 'users_manage';
+//     const { id } = await request.json();
+//     const defaultUserIdObjects = await prisma.profile.findMany({
+//         where: {
+//             email: {
+//                 in: ['alarafatsiddique@gmail.com']
+//             }
+//         },
+//         select: {
+//             id: true
+//         }
+//     });
+//     const defaultUserIds = defaultUserIdObjects.map((obj) => obj.id);
+//     const deleteOrNot = defaultUserIds.some((item) => id.includes(item));
+//     if (await checkPermission(request, requiredPermission)) {
+//         try {
+//             if (id.length > 1) {
+//                 if (deleteOrNot) {
+//                     return NextResponse.json({
+//                         message: `default users cannot be deleted.`,
+//                         status: false
+//                     });
+//                 }
+
+//                 for (let i = 0; i < id.length; i++) {
+//                     const profile = await prisma.profile.findFirst({
+//                         where: {
+//                             id: id[i]
+//                         }
+//                     });
+//                     //for phone-otp user
+//                     if (profile?.otpUserId !== null) {
+//                         await prisma.otpUser.delete({
+//                             where: { id: profile?.otpUserId }
+//                         });
+//                         await prisma.profile.delete({
+//                             where: { id: profile?.id }
+//                         });
+//                     }
+//                     //for email-password user
+//                     if (profile?.userId !== null) {
+//                         await prisma.user.delete({
+//                             where: { id: profile?.userId }
+//                         });
+//                         await prisma.profile.delete({
+//                             where: { id: profile?.id }
+//                         });
+//                     }
+//                 }
+
+//                 return NextResponse.json({
+//                     message: 'Profiles Delete has been successfully',
+//                     status: true
+//                 });
+//             } else {
+//                 if (deleteOrNot) {
+//                     return NextResponse.json({
+//                         message: `default users cannot be deleted.`,
+//                         status: false
+//                     });
+//                 }
+//                 const profile = await prisma.profile.findFirst({
+//                     where: {
+//                         id: id[0]
+//                     }
+//                 });
+//                 //for phone-otp user
+//                 if (profile?.otpUserId !== null) {
+//                     await prisma.otpUser.delete({
+//                         where: { id: profile?.otpUserId }
+//                     });
+//                     await prisma.profile.delete({
+//                         where: { id: profile?.id }
+//                     });
+//                 }
+//                 //for email-password user
+//                 if (profile?.userId !== null) {
+//                     await prisma.user.delete({
+//                         where: { id: profile?.userId }
+//                     });
+//                     await prisma.profile.delete({
+//                         where: { id: profile?.id }
+//                     });
+//                 }
+
+//                 return NextResponse.json({
+//                     message: 'Profiles Delete has been successfully',
+//                     status: true
+//                 });
+//             }
+//         } catch (error) {
+//             return NextResponse.json({ message: error }, { status: 500 });
+//         }
+//     } else {
+//         return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+//     }
+// };

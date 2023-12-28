@@ -51,8 +51,16 @@ export const POST = async (request: Request, req: NextApiRequest) => {
         const existUser: any = await prisma.user.findFirst({
             where: { email },
             select: {
+                id:true,
                 password: true,
-                email: true
+                email: true,
+                phone:true,
+                roles: true,
+                email_verified: true,
+                phone_verified:true,
+                name: true,
+                address: true,
+                whatapp:true
             }
         });
 
@@ -60,6 +68,9 @@ export const POST = async (request: Request, req: NextApiRequest) => {
             return NextResponse.json({ message: 'No user found with this email.', status: false });
         }
         const passwordMatch = await compare(password, existUser?.password);
+        if(!existUser?.email_verified){
+            return NextResponse.json({ message: 'Email is not verified.', status: false });
+        }
         if (passwordMatch) {
             cookies().set({
                 name: 'email',
@@ -68,17 +79,9 @@ export const POST = async (request: Request, req: NextApiRequest) => {
                 secure: process.env.NODE_ENV === 'production',
                 path: '/'
             });
+            
             const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_AGE });
-            // const refresh_token = jwt.sign({ email }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_AGE });
-
-            // cookies().set({
-            //     name: 'refresh_token',
-            //     value: refresh_token,
-            //     httpOnly: true,
-            //     secure: process.env.NODE_ENV === 'production',
-            //     path: '/',
-            //     maxAge: REFRESH_TOKEN_AGE
-            // });
+          
             const serialized = serialize('jwt', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -91,9 +94,15 @@ export const POST = async (request: Request, req: NextApiRequest) => {
             // });
             const userInfo = {
                 id: existUser?.id,
+                name: existUser?.name,
+                whatsapp: existUser?.whatapp,
+                address: existUser?.address,
                 email: existUser?.email,
+                phone: existUser?.phone,
                 roles: existUser?.roles,
-                verified: existUser?.email_verified
+                email_verified: existUser?.email_verified,
+                phone_verified: existUser?.phone_verified,
+                
             }
 
             return new Response(JSON.stringify({ message: 'login successful',user: userInfo, token: token, status: true }), {

@@ -8,7 +8,7 @@ type TokenData = {
     iat: number;
     exp: number;
 };
-export const checkPermission = async (request: NextRequest, requiredPermission: string) => {
+export const checkPermissionAndUser = async (request: NextRequest, requiredPermission: string, userId: number) => {
     const token = request.cookies.get('jwt');
     let email: any = request.cookies.get('email')?.value;
     let phone: any = request.cookies.get('phone')?.value;
@@ -32,7 +32,7 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
                         }
                     },
                     email_verified: true,
-                    id:true
+                    id: true
                 }
             });
 
@@ -44,7 +44,7 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
                     });
                 });
                 const uniquePermissionsArray = Array.from(uniquePermissionsSet);
-                if (verified && existUser?.email_verified && uniquePermissionsArray.includes(requiredPermission)) {
+                if (verified && existUser?.email_verified && uniquePermissionsArray.includes(requiredPermission) && userId === existUser?.id) {
                     return true;
                 } else {
                     return false;
@@ -67,7 +67,8 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
                             }
                         }
                     },
-                    phone_verified: true
+                    phone_verified: true,
+                    id:true
                 }
             });
 
@@ -79,7 +80,7 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
                     });
                 });
                 const uniquePermissionsArray = Array.from(uniquePermissionsSet);
-                if (verified && existUser?.phone_verified && uniquePermissionsArray.includes(requiredPermission)) {
+                if (verified && existUser?.phone_verified && uniquePermissionsArray.includes(requiredPermission) && userId === existUser?.id) {
                     return true;
                 } else {
                     return false;

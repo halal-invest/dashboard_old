@@ -58,6 +58,9 @@ model Role {
 
 model User {
   id             Int     @id @default(autoincrement())
+  name           String?
+  whatapp        String?
+  address        String?
   email          String?
   email_verified Boolean @default(false)
   password       String?
@@ -72,30 +75,29 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Profile   Profile?
-  
 }
 
 model Profile {
-  id                   Int     @id @default(autoincrement())
-  user_id              Int     @unique
-  user                 User    @relation(fields: [user_id], references: [id])
-  personal_photo       String?
-  father_name          String?
-  job_title            String?
-  dob                  String?
-  address              String?
-  city                 String? @default("Dhaka")
-  country              String? @default("Bangladesh")
-  postal_code          String?
-  facebook_profile     String?
-  whatsapp_no          String?
-  repayment_method     String?
-  nid                  String?
-  nominee_nid          String?
-  nominee_name         String?
-  nominee_phone        String?
-  gender               String?
-  
+  id               Int     @id @default(autoincrement())
+  user_id          Int     @unique
+  user             User    @relation(fields: [user_id], references: [id])
+  personal_photo   String?
+  father_name      String?
+  job_title        String?
+  dob              String?
+  address          String?
+  city             String? @default("Dhaka")
+  country          String? @default("Bangladesh")
+  postal_code      String?
+  facebook_profile String?
+  whatsapp_no      String?
+  repayment_method String?
+  nid              String?
+  nominee_nid      String?
+  nominee_name     String?
+  nominee_phone    String?
+  gender           String?
+
   bank_name            String?
   account_no           String?
   account_holders_name String?
