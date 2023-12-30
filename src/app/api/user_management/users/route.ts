@@ -2,13 +2,44 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
 import { hash } from 'bcrypt';
 import { checkPermission } from '@/utils/checkPermissions';
+import { checkPermissionAndUser } from '@/utils/checkPermissionAndUser';
 export const GET = async (request: NextRequest) => {
-    const requiredPermission = 'users_manage';
-    if (await checkPermission(request, requiredPermission)) {
-        try {
+    const { searchParams } = new URL(request.url);
+    const user_id_from_params = searchParams.get('userId');
+    const admin_permission = 'users_manage';
+    const investor_permission = 'investment';
+
+    try {
+        if (await checkPermission(request, admin_permission)) {
+            if (user_id_from_params) {
+                const user = await prisma.user.findFirst({
+                    where: {
+                        id: +user_id_from_params
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        whatapp: true,
+                        email_verified: true,
+                        email: true,
+                        phone: true,
+                        phone_verified: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        isActive: true,
+                        isDeleted: true,
+                        roles: true
+                    }
+                });
+                return NextResponse.json(user, { status: 200 });
+            }
             const users = await prisma.user.findMany({
                 select: {
                     id: true,
+                    name: true,
+                    address: true,
+                    whatapp: true,
                     email_verified: true,
                     email: true,
                     phone: true,
@@ -16,15 +47,24 @@ export const GET = async (request: NextRequest) => {
                     createdAt: true,
                     updatedAt: true,
                     isActive: true,
-                    isDeleted: false
+                    isDeleted: true,
+                    roles: true
                 }
             });
             return NextResponse.json(users, { status: 200 });
-        } catch (error) {
-            return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
         }
-    } else {
-        return NextResponse.json(null, { status: 200 });
+        if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
+            const user = await prisma.user.findFirst({
+                where: {
+                    id: +user_id_from_params
+                }
+            });
+            return NextResponse.json(user, { status: 200 });
+        } else {
+            return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
+        }
+    } catch (error) {
+        return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
     }
 };
 
