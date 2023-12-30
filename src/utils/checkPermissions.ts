@@ -12,8 +12,8 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
     const token = request.cookies.get('jwt');
     let email: any = request.cookies.get('email')?.value;
     let phone: any = request.cookies.get('phone')?.value;
-    if (!token) {
-        return NextResponse.json({ message: 'Unauthorized', status: 401 });
+    if (token === undefined) {
+        return false;
     }
     try {
         const verified = verify(token?.value, JWT_SECRET);
@@ -35,6 +35,7 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
                     id:true
                 }
             });
+            console.log(existUser);
 
             if (existUser) {
                 const uniquePermissionsSet = new Set();

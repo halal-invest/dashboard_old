@@ -12,8 +12,8 @@ export const checkPermissionAndUser = async (request: NextRequest, requiredPermi
     const token = request.cookies.get('jwt');
     let email: any = request.cookies.get('email')?.value;
     let phone: any = request.cookies.get('phone')?.value;
-    if (!token) {
-        return NextResponse.json({ message: 'Unauthorized', status: 401 });
+    if (token === undefined) {
+        return false;
     }
     try {
         const verified = verify(token?.value, JWT_SECRET);
