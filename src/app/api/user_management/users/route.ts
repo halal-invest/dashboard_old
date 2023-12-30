@@ -115,13 +115,14 @@ export const GET = async (request: NextRequest) => {
 //     }
 // };
 
-export const PUT = async (request: NextRequest) => {
-    const requiredPermission = 'users_manage';
+export const PATCH = async (request: NextRequest) => {
+    const requiredPermission = 'investor';
 
     let hashedPassword;
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const { id, password, email, phone, roles, isActive } = await request.json();
+            const { id, name, address, whatsapp, password, email, email_verified, phone_verified, isDeleted, phone, roles, isActive } = await request.json();
+            // console.log(id, name, address, whatsapp, email_verified, phone_verified, isDeleted, password, email, phone, roles, isActive);
 
             const existingUser = await prisma.user.findUnique({
                 where: {
@@ -129,47 +130,56 @@ export const PUT = async (request: NextRequest) => {
                 },
                 include: { roles: true }
             });
-            const existProfile = await prisma.profile.findFirst({
-                where: {
-                    user_id: existingUser?.id
+
+            if (email && email !== existingUser?.email) {
+                const emailExistOrNot = await prisma.user.findFirst({
+                    where: { email }
+                });
+                if (emailExistOrNot) {
+                    return NextResponse.json({ message: 'Cannot update email. Another user exists with this email.', status: false });
                 }
-            });
+            }
+
+            if (phone && phone !== existingUser?.phone) {
+                const phoneExistOrNot = await prisma.user.findFirst({
+                    where: { phone }
+                });
+                if (phoneExistOrNot) {
+                    return NextResponse.json({ message: 'Cannot update phone. Another user exists with this phone.', status: false });
+                }
+            }
             if (password) {
                 hashedPassword = await hash(password, 10);
             }
             if (!password) {
+                console.log('no password');
                 hashedPassword = existingUser?.password;
             }
-            const existUserPhone = await prisma.user.findFirst({
-                where: { phone }
-            });
-            const existUserEmail = await prisma.user.findFirst({
-                where: { email }
-            });
-            if (existUserEmail) {
-                return NextResponse.json({ message: 'User exists with this email.', status: false });
-            }
-            if (existUserPhone) {
-                return NextResponse.json({ message: 'User exists with this phone.', status: false });
-            }
 
-            const updatedUser = prisma.user.update({
+            const updatedUser = await prisma.user.update({
                 where: {
                     id: id
                 },
                 data: {
+                    name,
+                    address,
+                    whatsapp,
                     password: hashedPassword,
                     email,
                     phone,
                     isActive,
+                    isDeleted,
                     roles: {
                         disconnect: existingUser?.roles,
                         connect: roles.map((roleId: any) => ({ id: roleId }))
-                    }
+                    },
+                    email_verified,
+                    phone_verified
                 }
             });
 
             return NextResponse.json({
+                user: updatedUser,
                 message: `User ${name} has been updated successfully`,
                 status: true
             });

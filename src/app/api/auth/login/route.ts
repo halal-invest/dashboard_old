@@ -60,7 +60,7 @@ export const POST = async (request: Request, req: NextApiRequest) => {
                 phone_verified:true,
                 name: true,
                 address: true,
-                whatapp:true
+                whatsapp:true
             }
         });
 

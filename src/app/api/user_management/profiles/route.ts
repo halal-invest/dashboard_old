@@ -82,10 +82,9 @@ export const GET = async (request: NextRequest) => {
 //     // }
 // };
 
-export const PUT = async (request: NextRequest) => {
+export const PATCH = async (request: NextRequest) => {
     let {
-        id,
-        name,
+        name, 
         personal_photo,
         father_name,
         job_title,
@@ -116,9 +115,17 @@ export const PUT = async (request: NextRequest) => {
     const admin_permission = 'users_manage';
 
     try {
-        if (await checkPermission(request, admin_permission)) {
+        if (user_id_from_params !== null && await checkPermission(request, admin_permission)) {
+            const updateUser = await prisma.user.update({
+                where:{id: +user_id_from_params},
+                data: {
+                    name:name,
+                    address: address,
+                    whatsapp:whatsapp_no
+                }
+            })
             const updatedProfile = await prisma.profile.update({
-                where: { id: id },
+                where: { user_id: +user_id_from_params },
                 data: {
                     personal_photo,
                     father_name,
@@ -152,6 +159,14 @@ export const PUT = async (request: NextRequest) => {
             });
         }
         if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
+            const updateUser = await prisma.user.update({
+                where:{id: +user_id_from_params},
+                data: {
+                    name:name,
+                    address: address,
+                    whatsapp:whatsapp_no
+                }
+            })
             const updatedProfile = await prisma.profile.update({
                 where: { user_id: +user_id_from_params },
                 data: {
@@ -189,6 +204,7 @@ export const PUT = async (request: NextRequest) => {
 
         return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
     } catch (error) {
+        console.log(error);
         return NextResponse.json({ message: error }, { status: 500 });
     }
 };
