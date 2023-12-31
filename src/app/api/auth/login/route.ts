@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
 import { compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -31,6 +31,24 @@ const schema = object().shape({
     email: string().required().email(),
     password: string().required().min(8).max(16)
 });
+export const GET = async (request: NextRequest) => {
+    // Return Response
+    return NextResponse.json(
+      {
+        data: [
+          {
+            id: "45eb616b-7283-4a16-a4e7-2a25acbfdf02",
+            name: "John Doe",
+            email: "john.doe@email.com",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      },
+      {
+        status: 200,
+      }
+    );
+  };
 
 export const POST = async (request: Request, req: NextApiRequest) => {
     const { email, password } = await request.json();
