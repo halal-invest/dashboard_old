@@ -65,7 +65,7 @@ export const POST = async (request: Request) => {
                         email: true,
                         email_verified: true,
                         name: true,
-                        whatapp: true,
+                        whatsapp: true,
                         address: true,
                         roles: true
                     }
@@ -101,7 +101,7 @@ export const POST = async (request: Request) => {
                             email: true,
                             email_verified: true,
                             name: true,
-                            whatapp: true,
+                            whatsapp: true,
                             address: true,
                             roles: true
                         }
@@ -136,7 +136,7 @@ export const POST = async (request: Request) => {
                 const userInfo = {
                     id: existUser?.id,
                     name: existUser?.name,
-                    whatsapp: existUser?.whatapp,
+                    whatsapp: existUser?.whatsapp,
                     address: existUser?.address,
                     email: existUser?.email,
                     phone: existUser?.phone,
