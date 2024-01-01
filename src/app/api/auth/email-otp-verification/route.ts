@@ -52,7 +52,7 @@ export const POST = async (request: Request) => {
                 console.log(codeFromToken);
 
                 if (email !== emailFromToken) {
-                    return NextResponse.json({ message: 'Invalid Request.', status: false });
+                    return NextResponse.json({ message: 'Requested Email mismatched.', status: false });
                 }
                 if (code !== codeFromToken) {
                     return NextResponse.json({ message: 'Verification Code is not Correct', status: false });

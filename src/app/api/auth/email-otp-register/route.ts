@@ -4,7 +4,7 @@ import { hash } from 'bcrypt';
 import { sendEmailWithNodemailer } from '@/utils/emails';
 import { IP_ADDRESS_URL, JWT_JOIN_SECRET, RATE_LIMIT, RATE_LIMIT_TIME, RATE_LIMIT_TIME_MIN, URL } from '@/utils/constants';
 import jwt from 'jsonwebtoken';
-const MAX_AGE = 60 * 60 * 24 * 7;
+const MAX_AGE = 60 ;
 
 import { string, number, object } from 'yup';
 import sanitize from 'sanitize-html';
@@ -80,6 +80,6 @@ export const POST = async (request: NextRequest, req: NextApiRequest) => {
         }
         return NextResponse.json({ token: token, otp: randomNumber, message: 'Verification Code sent to your Email. Waiting for Verification.' });
     } catch (error: any) {
-        return NextResponse.json({ message: error, status: 500 });
+        return NextResponse.json({ message: error.message, status: false });
     }
 };

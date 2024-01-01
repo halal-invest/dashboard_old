@@ -8,7 +8,7 @@ import { string, number, object, ref } from 'yup';
 import sanitize from 'sanitize-html';
 import { get, set } from 'lodash';
 const schema = object().shape({
-    password: string().required().min(8).max(16)
+    password: string().required().min(6).max(16)
 });
 export const PATCH = async (request: NextRequest) => {
     const { id, password } = await request.json();
@@ -39,7 +39,7 @@ export const PATCH = async (request: NextRequest) => {
         } else {
             return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
         }
-    } catch (error) {
-        return NextResponse.json({ message: error, status: 500, msg: 'catch error' });
+    } catch (error:any) {
+        return NextResponse.json({ message: error.message, status: false });
     }
 };

@@ -66,7 +66,8 @@ export const POST = async (request: Request, req: NextApiRequest) => {
                 return NextResponse.json({ message: 'Something went wrong',phone: phone,status: false });
             }
 
-    } catch (error) {
-        return NextResponse.json({ message: error, status: 500, msg: 'catch error' });
+    } catch (error:any) {
+        console.log(error.message)
+        return NextResponse.json({ message: error.message, status: false});
     }
 };
