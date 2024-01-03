@@ -83,10 +83,10 @@ export const POST = async (request: Request, req:NextApiRequest) => {
                     }
                 });
 
-                return NextResponse.json({ message: 'Passsword Reset Successfully', status: true });
+                return NextResponse.json({ message: 'Password Reset Successfully', status: true });
             }
         } catch (error: any) {
-            console.log(error);
+            // console.log(error);
             return NextResponse.json({ message: error?.message, status: false });
         }
     } else {

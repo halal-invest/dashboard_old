@@ -71,7 +71,7 @@ export const POST = async (request: Request, req: NextApiRequest) => {
         sendEmailWithNodemailer(emailData);
 
         return new Response(JSON.stringify({ message: 'reset password link sent successfully', token: token, status: true }));
-    } catch (error) {
-        return NextResponse.json({ message: error, status: 500, msg: 'catch error' });
+    } catch (error:any) {
+        return NextResponse.json({ message: error.message, status: 500, msg: 'catch error' });
     }
 };
