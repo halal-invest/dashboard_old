@@ -32,13 +32,13 @@ const schema = object().shape({
 export const POST = async (request: Request, req: NextApiRequest) => {
     const { phone } = await request.json();
     try {
-        const ipAddress = await axios(IP_ADDRESS_URL);
-        const ip = ipAddress.data.userPrivateIpAddress;
-        if (ip !== null) {
-            if (!rateLimiterMiddleware(ip)) {
-                return NextResponse.json({ message: `Too Many Requests. Try again ${RATE_LIMIT_TIME_MIN} after  minutes.`, status: false });
-            }
-        }
+        // const ipAddress = await axios(IP_ADDRESS_URL);
+        // const ip = ipAddress.data.userPrivateIpAddress;
+        // if (ip !== null) {
+        //     if (!rateLimiterMiddleware(ip)) {
+        //         return NextResponse.json({ message: `Too Many Requests. Try again ${RATE_LIMIT_TIME_MIN} after  minutes.`, status: false });
+        //     }
+        // }
         const cleanInput = {
             phone: sanitize(phone)
         };

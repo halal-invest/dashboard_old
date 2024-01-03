@@ -29,37 +29,37 @@ const rateLimiterMiddleware = (ip: string): boolean => {
 };
 const schema = object().shape({
     email: string().required().email(),
-    password: string().required().min(8).max(16)
+    password: string().required().min(6).max(16)
 });
 export const GET = async (request: NextRequest) => {
     // Return Response
     return NextResponse.json(
-      {
-        data: [
-          {
-            id: "45eb616b-7283-4a16-a4e7-2a25acbfdf02",
-            name: "John Doe",
-            email: "john.doe@email.com",
-            createdAt: new Date().toISOString(),
-          },
-        ],
-      },
-      {
-        status: 200,
-      }
+        {
+            data: [
+                {
+                    id: '45eb616b-7283-4a16-a4e7-2a25acbfdf02',
+                    name: 'John Doe',
+                    email: 'john.doe@email.com',
+                    createdAt: new Date().toISOString()
+                }
+            ]
+        },
+        {
+            status: 200
+        }
     );
-  };
+};
 
 export const POST = async (request: Request, req: NextApiRequest) => {
     const { email, password } = await request.json();
     try {
-        const ipAddress = await axios(IP_ADDRESS_URL);
-        const ip = ipAddress.data.userPrivateIpAddress;
-        if (ip !== null) {
-            if (!rateLimiterMiddleware(ip)) {
-                return NextResponse.json({ message: `Too Many Requests. Try again ${RATE_LIMIT_TIME_MIN} after  minutes.`, status: false });
-            }
-        }
+        // const ipAddress = await axios(IP_ADDRESS_URL);
+        // const ip = ipAddress.data.userPrivateIpAddress;
+        // if (ip !== null) {
+        //     if (!rateLimiterMiddleware(ip)) {
+        //         return NextResponse.json({ message: `Too Many Requests. Try again ${RATE_LIMIT_TIME_MIN} after  minutes.`, status: false });
+        //     }
+        // }
         const cleanInput = {
             email: sanitize(email),
             password: sanitize(password)
@@ -69,16 +69,16 @@ export const POST = async (request: Request, req: NextApiRequest) => {
         const existUser: any = await prisma.user.findFirst({
             where: { email },
             select: {
-                id:true,
+                id: true,
                 password: true,
                 email: true,
-                phone:true,
+                phone: true,
                 roles: true,
                 email_verified: true,
-                phone_verified:true,
+                phone_verified: true,
                 name: true,
                 address: true,
-                whatsapp:true
+                whatsapp: true
             }
         });
 
@@ -86,7 +86,7 @@ export const POST = async (request: Request, req: NextApiRequest) => {
             return NextResponse.json({ message: 'No user found with this email.', status: false });
         }
         const passwordMatch = await compare(password, existUser?.password);
-        if(!existUser?.email_verified){
+        if (!existUser?.email_verified) {
             return NextResponse.json({ message: 'Email is not verified.', status: false });
         }
         if (passwordMatch) {
@@ -97,13 +97,21 @@ export const POST = async (request: Request, req: NextApiRequest) => {
                 secure: process.env.NODE_ENV === 'production',
                 path: '/'
             });
-            
+
             const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_AGE });
-          
-            const serialized = serialize('jwt', token, {
+
+            // const serialized = serialize('jwt', token, {
+            //     httpOnly: true,
+            //     secure: process.env.NODE_ENV === 'production',
+            //     sameSite: 'strict',
+            //     path: '/',
+            //     maxAge: ACCESS_TOKEN_AGE
+            // });
+            cookies().set({
+                name: 'jwt',
+                value: token,
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
                 path: '/',
                 maxAge: ACCESS_TOKEN_AGE
             });
@@ -119,19 +127,15 @@ export const POST = async (request: Request, req: NextApiRequest) => {
                 phone: existUser?.phone,
                 roles: existUser?.roles,
                 email_verified: existUser?.email_verified,
-                phone_verified: existUser?.phone_verified,
-                
-            }
+                phone_verified: existUser?.phone_verified
+            };
 
-            return new Response(JSON.stringify({ message: 'login successful',user: userInfo, token: token, status: true }), {
-                headers: { 'Set-Cookie': serialized },
-                status: 200
-            });
+            return NextResponse.json({ message: 'login successful',user: userInfo, token: token, status: true });
         } else {
             return NextResponse.json({ message: 'Password Incorrect.', status: false });
         }
-    } catch (error) {
+    } catch (error:any) {
         console.log(error);
-        return NextResponse.json({ message: error, status: 500, msg: 'catch error' });
+        return NextResponse.json({ message: error.message, status: 500 });
     }
 };
