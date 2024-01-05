@@ -60,7 +60,7 @@ export const POST = async (request: Request, req:NextApiRequest) => {
                 if (email !== emailFromToken) {
                     return NextResponse.json({ message: 'Reset Password link was sent to a different email address.', status: false });
                 }
-                const existUser = await prisma.user.findFirst({
+                const existUser = await prisma.users.findFirst({
                     where: { email }
                 });
                 if (!existUser) {
@@ -71,7 +71,7 @@ export const POST = async (request: Request, req:NextApiRequest) => {
                 }
                 const hashedPassword = await hash(password, 10);
 
-                await prisma.user.update({
+                await prisma.users.update({
                     where: {
                         id: existUser?.id
                     },

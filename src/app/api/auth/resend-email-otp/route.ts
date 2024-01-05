@@ -45,7 +45,7 @@ export const POST = async (request: NextRequest, req: NextApiRequest) => {
         };
         await schema.validate(cleanInput);
 
-        const existUser = await prisma.user.findFirst({
+        const existUser = await prisma.users.findFirst({
             where: { email },
             select: { email_verified: true }
         });

@@ -10,7 +10,7 @@ export const GET = async (request: NextRequest) => {
     if (await checkPermission(request, requiredPermission)) {
         try {
             if (roleId) {
-                const roles = await prisma.role.findMany({
+                const roles = await prisma.roles.findMany({
                     where: {
                         id: +roleId
                     },
@@ -20,7 +20,7 @@ export const GET = async (request: NextRequest) => {
                 });
                 return NextResponse.json(roles, { status: 200 });
             } else {
-                const roles = await prisma.role.findMany({
+                const roles = await prisma.roles.findMany({
                     include: {
                         permissions: true
                     }
@@ -41,14 +41,14 @@ export const POST = async (request: NextRequest) => {
 
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const existRole = await prisma.role.findUnique({
+            const existRole = await prisma.roles.findUnique({
                 where: { title }
             });
 
             if (existRole) {
                 return NextResponse.json({ message: 'Role exists with this title. Try another title', status: false });
             } else {
-                await prisma.role.create({
+                await prisma.roles.create({
                     data: {
                         title: title,
                         description: description,
@@ -76,7 +76,7 @@ export const PATCH = async (request: NextRequest) => {
     if (await checkPermission(request, requiredPermission)) {
         try {
             const { id, title, description, permissions } = await request.json();
-            const existingRole = prisma.role.update({
+            const existingRole = prisma.roles.update({
                 where: {
                     id: id
                 },
@@ -85,7 +85,7 @@ export const PATCH = async (request: NextRequest) => {
                 }
             });
 
-            const role = prisma.role.update({
+            const role = prisma.roles.update({
                 where: {
                     id: id
                 },
@@ -114,7 +114,7 @@ export const PATCH = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
     const requiredPermission = 'users_manage';
     const { id } = await request.json();
-    const defaultRoleIdObjects = await prisma.role.findMany({
+    const defaultRoleIdObjects = await prisma.roles.findMany({
         where: {
             title: {
                 in: ['admin', 'customer']
@@ -136,7 +136,7 @@ export const DELETE = async (request: NextRequest) => {
                         status: false
                     });
                 }
-                await prisma.role.deleteMany({
+                await prisma.roles.deleteMany({
                     where: {
                         id: {
                             in: id
@@ -154,7 +154,7 @@ export const DELETE = async (request: NextRequest) => {
                         status: false
                     });
                 }
-                await prisma.role.delete({
+                await prisma.roles.delete({
                     where: {
                         id: id[0]
                     }

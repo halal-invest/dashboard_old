@@ -23,7 +23,7 @@ export const PATCH = async (request: NextRequest) => {
             await schema.validate(cleanInput);
             hashedPassword = await hash(password, 10);
 
-            await prisma.user.update({
+            await prisma.users.update({
                 where: {
                     id: id
                 },

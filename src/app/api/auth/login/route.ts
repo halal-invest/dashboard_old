@@ -66,7 +66,7 @@ export const POST = async (request: Request, req: NextApiRequest) => {
         };
         await schema.validate(cleanInput);
 
-        const existUser: any = await prisma.user.findFirst({
+        const existUser: any = await prisma.users.findFirst({
             where: { email },
             select: {
                 id: true,

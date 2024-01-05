@@ -12,7 +12,7 @@ export const GET = async (request: NextRequest) => {
     try {
         if (await checkPermission(request, admin_permission)) {
             if (user_id_from_params) {
-                const user = await prisma.user.findFirst({
+                const user = await prisma.users.findFirst({
                     where: {
                         id: +user_id_from_params
                     },
@@ -34,7 +34,7 @@ export const GET = async (request: NextRequest) => {
                 });
                 return NextResponse.json(user, { status: 200 });
             }
-            const users = await prisma.user.findMany({
+            const users = await prisma.users.findMany({
                 select: {
                     id: true,
                     name: true,
@@ -54,7 +54,7 @@ export const GET = async (request: NextRequest) => {
             return NextResponse.json(users, { status: 200 });
         }
         if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
-            const user = await prisma.user.findFirst({
+            const user = await prisma.users.findFirst({
                 where: {
                     id: +user_id_from_params
                 }
@@ -124,7 +124,7 @@ export const PATCH = async (request: NextRequest) => {
             const { id, name, address, whatsapp, password, email, email_verified, phone_verified, isDeleted, phone, roles, isActive } = await request.json();
             // console.log(id, name, address, whatsapp, email_verified, phone_verified, isDeleted, password, email, phone, roles, isActive);
 
-            const existingUser = await prisma.user.findUnique({
+            const existingUser = await prisma.users.findUnique({
                 where: {
                     id: id
                 },
@@ -132,7 +132,7 @@ export const PATCH = async (request: NextRequest) => {
             });
 
             if (email && email !== existingUser?.email) {
-                const emailExistOrNot = await prisma.user.findFirst({
+                const emailExistOrNot = await prisma.users.findFirst({
                     where: { email }
                 });
                 if (emailExistOrNot) {
@@ -141,7 +141,7 @@ export const PATCH = async (request: NextRequest) => {
             }
 
             if (phone && phone !== existingUser?.phone) {
-                const phoneExistOrNot = await prisma.user.findFirst({
+                const phoneExistOrNot = await prisma.users.findFirst({
                     where: { phone }
                 });
                 if (phoneExistOrNot) {
@@ -156,7 +156,7 @@ export const PATCH = async (request: NextRequest) => {
                 hashedPassword = existingUser?.password;
             }
 
-            const updatedUser = await prisma.user.update({
+            const updatedUser = await prisma.users.update({
                 where: {
                     id: id
                 },
@@ -200,7 +200,7 @@ export const DELETE = async (request: NextRequest) => {
 
     const { id } = await request.json();
     console.log(id);
-    const defaultUser = await prisma.user.findFirst({
+    const defaultUser = await prisma.users.findFirst({
         where: { email: 'alarafatsiddique@gmail.com' }
     });
 
@@ -216,7 +216,7 @@ export const DELETE = async (request: NextRequest) => {
                     });
                 }
                 if (softDelete) {
-                    await prisma.user.updateMany({
+                    await prisma.users.updateMany({
                         where: {
                             id: {
                                 in: id
@@ -228,7 +228,7 @@ export const DELETE = async (request: NextRequest) => {
                     });
                 }
                 if (!softDelete) {
-                    await prisma.user.deleteMany({
+                    await prisma.users.deleteMany({
                         where: {
                             id: {
                                 in: id
@@ -249,7 +249,7 @@ export const DELETE = async (request: NextRequest) => {
                     });
                 }
                 if (softDelete) {
-                    await prisma.user.update({
+                    await prisma.users.update({
                         where: {
                             id: id[0]
                         },
@@ -259,7 +259,7 @@ export const DELETE = async (request: NextRequest) => {
                     });
                 }
                 if (!softDelete) {
-                    await prisma.user.delete({
+                    await prisma.users.delete({
                         where: {
                             id: id[0]
                         }

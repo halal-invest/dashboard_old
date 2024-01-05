@@ -57,14 +57,14 @@ export const POST = async (request: Request) => {
                 if (code !== codeFromToken) {
                     return NextResponse.json({ message: 'Verification Code is not Correct', status: false });
                 }
-                const existUser = await prisma.user.findFirst({
+                const existUser = await prisma.users.findFirst({
                     where: { email }
                 });
                 if (!existUser) {
                     return NextResponse.json({ message: 'This email is not registered yet. Please register first.', status: false });
                 }
 
-                let investorRole = await prisma.role.findFirst({
+                let investorRole = await prisma.roles.findFirst({
                     where: {
                         title: 'investor'
                     },
@@ -73,7 +73,7 @@ export const POST = async (request: Request) => {
                     }
                 });
                 
-                const verifyUser = await prisma.user.update({
+                const verifyUser = await prisma.users.update({
                     where: {
                         id:existUser?.id
                     },
@@ -89,7 +89,7 @@ export const POST = async (request: Request) => {
                 });
                 if(verifyUser){
                     
-                    const userProfile = await prisma.profile.create({
+                    const userProfile = await prisma.profiles.create({
                     data:{
                         user: {
                             connect:{id:verifyUser?.id}

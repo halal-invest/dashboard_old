@@ -56,7 +56,7 @@ export const POST = async (request: Request) => {
                 if (number !== numberFromToken) {
                     return NextResponse.json({ message: 'Verification Code is not Correct', status: false });
                 }
-                let existUser = await prisma.user.findFirst({
+                let existUser = await prisma.users.findFirst({
                     where: { phone },
                     select: {
                         id: true,
@@ -70,7 +70,7 @@ export const POST = async (request: Request) => {
                         roles: true
                     }
                 });
-                const update_status = await prisma.user.update({
+                const update_status = await prisma.users.update({
                     where: { id: existUser?.id },
                     data: {
                         phone_verified: true
@@ -78,7 +78,7 @@ export const POST = async (request: Request) => {
                 });
 
                 if (!existUser) {
-                    let investorRole = await prisma.role.findFirst({
+                    let investorRole = await prisma.roles.findFirst({
                         where: {
                             title: 'investor'
                         },
@@ -86,7 +86,7 @@ export const POST = async (request: Request) => {
                             id: true
                         }
                     });
-                    const newOptUser = await prisma.user.create({
+                    const newOptUser = await prisma.users.create({
                         data: {
                             phone: phone,
                             roles: {
@@ -108,7 +108,7 @@ export const POST = async (request: Request) => {
                     });
                     existUser = newOptUser;
 
-                    const userProfile = await prisma.profile.create({
+                    const userProfile = await prisma.profiles.create({
                         data: {
                             user: {
                                 connect: { id: newOptUser?.id }

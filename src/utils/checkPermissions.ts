@@ -19,7 +19,7 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
         const verified = verify(token?.value, JWT_SECRET);
         //email-password users
         if (phone === undefined) {
-            const existUser = await prisma.user.findFirst({
+            const existUser = await prisma.users.findFirst({
                 where: { email },
                 select: {
                     roles: {
@@ -56,7 +56,7 @@ export const checkPermission = async (request: NextRequest, requiredPermission: 
         }
         if (email === undefined) {
             //otp users
-            const existUser = await prisma.user.findFirst({
+            const existUser = await prisma.users.findFirst({
                 where: { phone },
                 select: {
                     roles: {

@@ -9,57 +9,57 @@ datasource db {
 }
 
 //blog section
-model SubBLog {
+model Categories {
   id        Int      @id @default(autoincrement())
   title     String
   slug      String   @unique
-  blogs     Blog[]
+  posts     Posts[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Blog {
-  id        Int      @id @default(autoincrement())
-  title     String
-  slug      String   @unique
-  image     String?
-  author    String
-  content   String   @db.Text
-  subBlog   SubBLog? @relation(fields: [subBlogId], references: [id])
-  subBlogId Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Posts {
+  id          Int         @id @default(autoincrement())
+  title       String
+  slug        String      @unique
+  image       String?
+  author      String
+  content     String      @db.Text
+  category    Categories? @relation(fields: [category_id], references: [id])
+  category_id Int?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  @@index([subBlogId])
+  @@index([category_id])
 }
 
 //authentication
-model Permission {
+model Permissions {
   id          Int      @id @unique @default(autoincrement())
   title       String   @unique
   description String?
-  roles       Role[]
+  roles       Roles[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model Role {
-  id          Int          @id @unique @default(autoincrement())
-  title       String       @unique
+model Roles {
+  id          Int           @id @unique @default(autoincrement())
+  title       String        @unique
   description String?
-  permissions Permission[]
+  permissions Permissions[]
   // profiles    Profile[]
-  isActive    Boolean      @default(true)
-  isDeleted   Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  users       User[]
+  isActive    Boolean       @default(true)
+  isDeleted   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  users       Users[]
 }
 
-model User {
+model Users {
   id             Int     @id @default(autoincrement())
   name           String?
-  whatsapp        String?
+  whatsapp       String?
   address        String?
   email          String?
   email_verified Boolean @default(false)
@@ -70,17 +70,18 @@ model User {
 
   isActive  Boolean @default(true)
   isDeleted Boolean @default(false)
-  roles     Role[]
+  roles     Roles[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Profile   Profile?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Profile   Profiles?
+  Projects  Projects[]
 }
 
-model Profile {
+model Profiles {
   id               Int     @id @default(autoincrement())
   user_id          Int     @unique
-  user             User    @relation(fields: [user_id], references: [id])
+  user             Users   @relation(fields: [user_id], references: [id])
   personal_photo   String?
   father_name      String?
   job_title        String?
@@ -111,20 +112,88 @@ model Profile {
 }
 
 model Settings {
-  id          Int     @id @default(autoincrement())
-  logo        String?
-  title       String? @unique
-  admin_email       String? @unique
-  admin_phone       String?
+  id                   Int     @id @default(autoincrement())
+  logo                 String?
+  title                String? @unique
+  admin_email          String? @unique
+  admin_phone          String?
   business_address     String?
   business_description String?
 
-  email_host String?
-  email_user String?
+  email_host     String?
+  email_user     String?
   email_password String?
-  email_from String?
+  email_from     String?
 
   otp_api_token String?
+}
 
-  
+model Types {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  Projects    Projects[]
+}
+
+model Projects {
+  id                                         Int      @id @default(autoincrement())
+  type_id                                    Int
+  type                                       Types    @relation(fields: [type_id], references: [id])
+  user_id                                    Int
+  user                                       Users    @relation(fields: [user_id], references: [id])
+  active                                     String //active, finished, running
+  title                                      String
+  description                                String?
+  repayment_type                             String //fixed, not_fixed
+  fixed_percent                              String
+  image_1                                    String
+  image_2                                    String
+  image_3                                    String
+  location                                   String
+  duration                                   String
+  start_date_to_invest                       String
+  last_date_to_invest                        String
+  investment_goal                            String
+  min_investment                             String
+  projected_roi                              String
+  risk_grade                                 String
+  repayment                                  String
+  raised                                     String
+  being_processed                            String
+  overview                                   String   @db.Text
+  deed                                       String   @db.Text
+  downloadableUrl                            String   @db.Text
+  intro_title                                String   @db.Text
+  intro_description                          String   @db.Text
+  intro_explore_fb                           String   @db.Text
+  intro_explore_website                      String   @db.Text
+  intro_explore_linkedin                     String   @db.Text
+  intro_office_address                       String   @db.Text
+  intro_owners_description                   String   @db.Text
+  intro_value_proposition                    String   @db.Text
+  contract_durationOfInvestment_description  String   @db.Text
+  contract_projected_roi_description         String   @db.Text
+  contract_conditions                        String   @db.Text
+  shariah_underlying_contracts_description   String   @db.Text
+  shariah_approval_from_scholars_description String   @db.Text
+  risks_business_assessment                  String   @db.Text
+  risks_possession_of_assets                 String   @db.Text
+  risks_repayment_delay                      String   @db.Text
+  risks_security                             String   @db.Text
+  showing_related_updates                    String   @db.Text
+  slug                                       String   @db.Text
+  letter_of_authorization                    String   @db.Text
+  letter_of_authorization_bangla             String   @db.Text
+  payment_schedule                           String   @db.Text
+  commission                                 String
+  profit                                     String
+  disclaimer                                 String   @db.Text
+  project_duration                           String
+  createdAt                                  DateTime @default(now())
+  updatedAt                                  DateTime @updatedAt
+
+  @@index([type_id])
+  @@index([user_id])
 }

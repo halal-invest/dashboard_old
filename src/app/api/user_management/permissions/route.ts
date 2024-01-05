@@ -8,7 +8,7 @@ export const GET = async (request: NextRequest) => {
 
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const permissions = await prisma.permission.findMany({
+            const permissions = await prisma.permissions.findMany({
                 include: {
                     roles: true
                 }
@@ -27,7 +27,7 @@ export const POST = async (request: NextRequest) => {
     const { title, description } = await request.json();
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const existTitle = await prisma.permission.findUnique({
+            const existTitle = await prisma.permissions.findUnique({
                 where: {
                     title
                 }
@@ -40,7 +40,7 @@ export const POST = async (request: NextRequest) => {
                 });
             }
 
-            await prisma.permission.create({
+            await prisma.permissions.create({
                 data: {
                     title,
                     description
@@ -64,7 +64,7 @@ export const PATCH = async (request: NextRequest) => {
         try {
             const { id, title, description } = await request.json();
 
-            await prisma.permission.update({
+            await prisma.permissions.update({
                 where: {
                     id: id
                 },
@@ -89,7 +89,7 @@ export const PATCH = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
     const requiredPermission = 'users_manage';
     const { id } = await request.json();
-    const defaultPermissionIdObjects = await prisma.permission.findMany({
+    const defaultPermissionIdObjects = await prisma.permissions.findMany({
         where: {
             title: {
                 in: ['users_manage', 'default_permission']
@@ -111,7 +111,7 @@ export const DELETE = async (request: NextRequest) => {
                         status: false
                     });
                 }
-                await prisma.permission.deleteMany({
+                await prisma.permissions.deleteMany({
                     where: {
                         id: {
                             in: id
@@ -129,7 +129,7 @@ export const DELETE = async (request: NextRequest) => {
                         status: false
                     });
                 }
-                await prisma.permission.delete({
+                await prisma.permissions.delete({
                     where: {
                         id: id[0]
                     }

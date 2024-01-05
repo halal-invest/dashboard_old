@@ -4,7 +4,7 @@ import { hash } from 'bcrypt';
 
 export const GET = async (request: NextRequest) => {
     try {
-        const adminCount = await prisma.user.count({
+        const adminCount = await prisma.users.count({
             where: {
                 roles: {
                     some: {
@@ -23,7 +23,7 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
     const { email, password } = await request.json();
     try {
-        const adminCount = await prisma.user.count({
+        const adminCount = await prisma.users.count({
             where: {
                 roles: {
                     some: {
@@ -36,20 +36,20 @@ export const POST = async (request: NextRequest) => {
         return NextResponse.json({ message: "Admin already exists.Please login", status: 500 });
 
         }
-        const users_managePermission = await prisma.permission.create({
+        const users_managePermission = await prisma.permissions.create({
             data: {
                 title: "users_manage",
                 description: "allow users management"
             }
         })
-        const investorPermission = await prisma.permission.create({
+        const investorPermission = await prisma.permissions.create({
             data: {
                 title: "investment",
                 description: "default permission"
             }
         })
 
-        const adminRole = await prisma.role.create({
+        const adminRole = await prisma.roles.create({
             data: {
                 title: 'admin',
                 description: 'admin',
@@ -59,7 +59,7 @@ export const POST = async (request: NextRequest) => {
 
             }
         })
-        const investorRole = await prisma.role.create({
+        const investorRole = await prisma.roles.create({
             data: {
                 title: 'investor',
                 description: 'investor',
@@ -72,7 +72,7 @@ export const POST = async (request: NextRequest) => {
        
 
             const hashedPassword = await hash(password, 10);
-            const adminUser = await prisma.user.create({
+            const adminUser = await prisma.users.create({
                 data: {
                     email,
                     password: hashedPassword,

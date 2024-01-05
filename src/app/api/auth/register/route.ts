@@ -65,7 +65,7 @@ export const POST = async (request: NextRequest, req: NextApiRequest) => {
         };
         await schema.validate(cleanInput);
 
-        const existUser = await prisma.user.findFirst({
+        const existUser = await prisma.users.findFirst({
             where: { email },
             select: { email_verified: true }
         });
@@ -90,7 +90,7 @@ export const POST = async (request: NextRequest, req: NextApiRequest) => {
         sendEmailWithNodemailer(emailData);
         const hashedPassword = await hash(password, 10);
         if (!existUser) {
-            const newUser = await prisma.user.create({
+            const newUser = await prisma.users.create({
                 data: {
                     email,
                     password: hashedPassword,

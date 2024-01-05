@@ -71,7 +71,7 @@ export const POST = async (request: Request, req:NextApiRequest) => {
                 if (code !== codeFromToken) {
                     return NextResponse.json({ message: 'Verification Code is not Correct', status: false });
                 }
-                const existUser = await prisma.user.findFirst({
+                const existUser = await prisma.users.findFirst({
                     where: { email },
                     select: {
                         id:true,
@@ -87,7 +87,7 @@ export const POST = async (request: Request, req:NextApiRequest) => {
                 }
                 const hashedPassword = await hash(password, 10);
 
-                await prisma.user.update({
+                await prisma.users.update({
                     where: {
                         id: existUser?.id
                     },

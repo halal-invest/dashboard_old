@@ -14,18 +14,18 @@ export const GET = async (request: NextRequest) => {
     try {
         if (await checkPermission(request, admin_permission)) {
             if (user_id_from_params) {
-                const user_profile = await prisma.profile.findFirst({
+                const user_profile = await prisma.profiles.findFirst({
                     where: {
                         user_id: +user_id_from_params
                     }
                 });
                 return NextResponse.json(user_profile, { status: 200 });
             }
-            const profiles = await prisma.profile.findMany();
+            const profiles = await prisma.profiles.findMany();
             return NextResponse.json(profiles, { status: 200 });
         }
         if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
-            const user_profile = await prisma.profile.findFirst({
+            const user_profile = await prisma.profiles.findFirst({
                 where: {
                     user_id: +user_id_from_params
                 }
@@ -116,7 +116,7 @@ export const PATCH = async (request: NextRequest) => {
 
     try {
         if (user_id_from_params !== null && await checkPermission(request, admin_permission)) {
-            const updateUser = await prisma.user.update({
+            const updateUser = await prisma.users.update({
                 where:{id: +user_id_from_params},
                 data: {
                     name:name,
@@ -124,7 +124,7 @@ export const PATCH = async (request: NextRequest) => {
                     whatsapp:whatsapp_no
                 }
             })
-            const updatedProfile = await prisma.profile.update({
+            const updatedProfile = await prisma.profiles.update({
                 where: { user_id: +user_id_from_params },
                 data: {
                     personal_photo,
@@ -159,7 +159,7 @@ export const PATCH = async (request: NextRequest) => {
             });
         }
         if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
-            const updateUser = await prisma.user.update({
+            const updateUser = await prisma.users.update({
                 where:{id: +user_id_from_params},
                 data: {
                     name:name,
@@ -167,7 +167,7 @@ export const PATCH = async (request: NextRequest) => {
                     whatsapp:whatsapp_no
                 }
             })
-            const updatedProfile = await prisma.profile.update({
+            const updatedProfile = await prisma.profiles.update({
                 where: { user_id: +user_id_from_params },
                 data: {
                     personal_photo,
