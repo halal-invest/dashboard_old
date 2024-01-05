@@ -124,14 +124,21 @@ export const POST = async (request: Request) => {
                     path: '/'
                 });
                 const token = jwt.sign({ phone }, JWT_SECRET, { expiresIn: MAX_AGE });
-
-                const serialized = serialize('jwt', token, {
+                cookies().set({
+                    name: 'jwt',
+                    value: token,
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict',
                     path: '/',
                     maxAge: MAX_AGE
                 });
+                // const serialized = serialize('jwt', token, {
+                //     httpOnly: true,
+                //     secure: process.env.NODE_ENV === 'production',
+                //     sameSite: 'strict',
+                //     path: '/',
+                //     maxAge: MAX_AGE
+                // });
 
                 const userInfo = {
                     id: existUser?.id,
@@ -144,10 +151,12 @@ export const POST = async (request: Request) => {
                     email_verified: existUser?.email_verified,
                     phone_verified: existUser?.phone_verified
                 };
-                return new Response(JSON.stringify({ message: 'Authenticated', user: userInfo, status: true }), {
-                    headers: { 'Set-Cookie': serialized },
-                    status: 200
-                });
+                return NextResponse.json({ message: 'login successful', user: userInfo, token: token, status: true });
+
+                // return new Response(JSON.stringify({ message: 'Authenticated', user: userInfo, status: true }), {
+                //     headers: { 'Set-Cookie': serialized },
+                //     status: 200
+                // });
             }
         } else {
             return NextResponse.json({ message: 'No token submitted.', status: false });
