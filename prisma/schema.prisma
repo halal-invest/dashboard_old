@@ -110,12 +110,21 @@ model Profile {
   updatedAt DateTime @updatedAt
 }
 
-model SiteInfo {
+model Settings {
   id          Int     @id @default(autoincrement())
   logo        String?
   title       String? @unique
-  email       String? @unique
-  phone       String?
-  address     String?
-  description String?
+  admin_email       String? @unique
+  admin_phone       String?
+  business_address     String?
+  business_description String?
+
+  email_host String?
+  email_user String?
+  email_password String?
+  email_from String?
+
+  otp_api_token String?
+
+  
 }
