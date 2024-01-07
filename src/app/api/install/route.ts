@@ -85,6 +85,15 @@ export const POST = async (request: NextRequest) => {
                     id:true
                 }
             });
+            const userProfile = await prisma.profiles.create({
+                data:{
+                    user: {
+                        connect:{id:adminUser?.id}
+                    },
+                   
+                    
+                }
+            })
            
         return NextResponse.json({ message: 'Admin created successfully', status: true });
     } catch (error) {
