@@ -70,12 +70,15 @@ export const POST = async (request: Request) => {
                         roles: true
                     }
                 });
-                const update_status = await prisma.users.update({
-                    where: { id: existUser?.id },
-                    data: {
-                        phone_verified: true
-                    }
-                });
+                if(existUser){
+                    const update_status = await prisma.users.update({
+                        where: { id: existUser?.id },
+                        data: {
+                            phone_verified: true
+                        }
+                    });
+                }
+                
 
                 if (!existUser) {
                     let investorRole = await prisma.roles.findFirst({
