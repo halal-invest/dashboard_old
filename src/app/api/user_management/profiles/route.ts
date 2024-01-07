@@ -2,35 +2,69 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../utils/connect';
 import { checkPermission } from '@/utils/checkPermissions';
 import { checkPermissionAndUser } from '@/utils/checkPermissionAndUser';
-
+import { ADMIN_PERMISSION, INVESTOR_PERMISSION } from '@/utils/permissions';
 
 export const GET = async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const user_id_from_params = searchParams.get('userId');
-    console.log(user_id_from_params);
-    const admin_permission = 'users_manage';
-    const investor_permission = 'investment';
-
+    
+    let single_profile;
+    let user;
     try {
-        if (await checkPermission(request, admin_permission)) {
-            if (user_id_from_params) {
-                const user_profile = await prisma.profiles.findFirst({
-                    where: {
-                        user_id: +user_id_from_params
-                    }
-                });
-                return NextResponse.json(user_profile, { status: 200 });
-            }
-            const profiles = await prisma.profiles.findMany();
-            return NextResponse.json(profiles, { status: 200 });
-        }
-        if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
-            const user_profile = await prisma.profiles.findFirst({
+        if (user_id_from_params) {
+            user = await prisma.users.findFirst({
+                where: {
+                    id: +user_id_from_params
+                },
+                select: {
+                    name: true
+                }
+            });
+            single_profile = await prisma.profiles.findFirst({
                 where: {
                     user_id: +user_id_from_params
                 }
             });
-            return NextResponse.json(user_profile, { status: 200 });
+        }
+
+        const user_info = {
+            id: single_profile?.id,
+            name: user?.name,
+            personal_photo: single_profile?.personal_photo,
+            father_name: single_profile?.father_name,
+            job_title: single_profile?.job_title,
+            dob: single_profile?.dob,
+            address: single_profile?.address,
+            city: single_profile?.city,
+            country: single_profile?.country,
+            postal_code: single_profile?.postal_code,
+            facebook_profile: single_profile?.facebook_profile,
+            whatsapp_no: single_profile?.whatsapp_no,
+            repayment_method: single_profile?.repayment_method,
+            nid: single_profile?.nid,
+            nominee_nid: single_profile?.nominee_nid,
+            nominee_name: single_profile?.nominee_name,
+            nominee_phone: single_profile?.nominee_phone,
+            gender: single_profile?.gender,
+            bank_name: single_profile?.bank_name,
+            account_no: single_profile?.account_no,
+            account_holders_name: single_profile?.account_holders_name,
+            branch_name: single_profile?.branch_name,
+            routing_no: single_profile?.routing_no,
+            district: single_profile?.routing_no,
+            bkash_no: single_profile?.bkash_no,
+            created_at: single_profile?.created_at,
+            updated_at: single_profile?.updated_at
+        };
+        if (await checkPermission(request, ADMIN_PERMISSION)) {
+            if (user_id_from_params) {
+                return NextResponse.json(user_info, { status: 200 });
+            }
+            const profiles = await prisma.profiles.findMany();
+            return NextResponse.json(profiles, { status: 200 });
+        }
+        if (user_id_from_params !== null && (await checkPermissionAndUser(request, INVESTOR_PERMISSION, +user_id_from_params))) {
+            return NextResponse.json(user_info, { status: 200 });
         }
         return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
     } catch (error) {
@@ -84,7 +118,7 @@ export const GET = async (request: NextRequest) => {
 
 export const PATCH = async (request: NextRequest) => {
     let {
-        name, 
+        name,
         personal_photo,
         father_name,
         job_title,
@@ -111,19 +145,17 @@ export const PATCH = async (request: NextRequest) => {
     } = await request.json();
     const { searchParams } = new URL(request.url);
     const user_id_from_params = searchParams.get('userId');
-    const investor_permission = 'investment';
-    const admin_permission = 'users_manage';
 
     try {
-        if (user_id_from_params !== null && await checkPermission(request, admin_permission)) {
+        if (user_id_from_params !== null && (await checkPermission(request, ADMIN_PERMISSION))) {
             const updateUser = await prisma.users.update({
-                where:{id: +user_id_from_params},
+                where: { id: +user_id_from_params },
                 data: {
-                    name:name,
+                    name: name,
                     address: address,
-                    whatsapp:whatsapp_no
+                    whatsapp: whatsapp_no
                 }
-            })
+            });
             const updatedProfile = await prisma.profiles.update({
                 where: { user_id: +user_id_from_params },
                 data: {
@@ -158,15 +190,15 @@ export const PATCH = async (request: NextRequest) => {
                 status: true
             });
         }
-        if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
+        if (user_id_from_params !== null && (await checkPermissionAndUser(request, INVESTOR_PERMISSION, +user_id_from_params))) {
             const updateUser = await prisma.users.update({
-                where:{id: +user_id_from_params},
+                where: { id: +user_id_from_params },
                 data: {
-                    name:name,
+                    name: name,
                     address: address,
-                    whatsapp:whatsapp_no
+                    whatsapp: whatsapp_no
                 }
-            })
+            });
             const updatedProfile = await prisma.profiles.update({
                 where: { user_id: +user_id_from_params },
                 data: {

@@ -25,8 +25,8 @@ export const GET = async (request: NextRequest) => {
                         email: true,
                         phone: true,
                         phone_verified: true,
-                        createdAt: true,
-                        updatedAt: true,
+                        created_at: true,
+                        updated_at: true,
                         isActive: true,
                         isDeleted: true,
                         roles: true
@@ -44,8 +44,8 @@ export const GET = async (request: NextRequest) => {
                     email: true,
                     phone: true,
                     phone_verified: true,
-                    createdAt: true,
-                    updatedAt: true,
+                    created_at: true,
+                    updated_at: true,
                     isActive: true,
                     isDeleted: true,
                     roles: true
