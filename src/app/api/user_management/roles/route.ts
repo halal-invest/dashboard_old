@@ -7,7 +7,7 @@ export const GET = async (request: NextRequest) => {
     const roleId = searchParams.get('id');
     const latest = searchParams.get('latest');
     const requiredPermission = 'users_manage';
-    if (await checkPermission(request, requiredPermission)) {
+    // if (await checkPermission(request, requiredPermission)) {
         try {
             if (roleId) {
                 const roles = await prisma.roles.findMany({
@@ -28,11 +28,12 @@ export const GET = async (request: NextRequest) => {
                 return NextResponse.json(roles, { status: 200 });
             }
         } catch (error) {
+            console.log(error);
             return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
         }
-    } else {
-        return NextResponse.json(null, { status: 200 });
-    }
+    // } else {
+    //     return NextResponse.json(null, { status: 200 });
+    // }
 };
 
 export const POST = async (request: NextRequest) => {

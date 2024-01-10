@@ -12,26 +12,77 @@ export const GET = async (request: NextRequest) => {
             const single_project = await prisma.projects.findFirst({
                 where: {
                     id: +project_id
+                },
+                include: {
+                    type: true
                 }
             });
             return NextResponse.json(single_project, { status: 200 });
         }
-        const projects= await prisma.projects.findMany();
+        const projects = await prisma.projects.findMany({
+            include: {
+                type: true
+            }
+        });
         return NextResponse.json(projects, { status: 200 });
     } catch (error) {
+        console.log(error);
         return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
     }
 };
 
 export const POST = async (request: NextRequest) => {
     const requiredPermission = 'projects';
-    const { active, type_id, user_id, title, description, repayment_type, fixed_percent, image_1, image_2, image_3, location, duration, 
-    investment_goal, min_investment, projected_roi, commission, profit, risk_grade, repayment, project_duration, raised, being_processed, 
-    start_date_to_invest, last_date_to_invest, overview, deed, letter_of_authorization, letter_of_authorization_bangla, payment_schedule, 
-    downloadableUrl, intro_description,intro_explore_fb, intro_explore_website, intro_explore_linkedin, intro_office_address,intro_owners_description, intro_value_proposition,
-    contract_durationOfInvestment_description, contract_projected_roi_description, contract_conditions,shariah_underlying_contracts_description,
-    shariah_approval_from_scholars_description,risks_business_assessment,risks_possession_of_assets,risks_repayment_delay,risks_security,
-    disclaimer,showing_related_updates,slug,
+    const {
+        active,
+        type_id,
+        user_id,
+        title,
+        description,
+        repayment_type,
+        fixed_percent,
+        image_1,
+        image_2,
+        image_3,
+        location,
+        duration,
+        investment_goal,
+        min_investment,
+        projected_roi,
+        commission,
+        profit,
+        risk_grade,
+        repayment,
+        project_duration,
+        raised,
+        being_processed,
+        start_date_to_invest,
+        last_date_to_invest,
+        overview,
+        deed,
+        letter_of_authorization,
+        letter_of_authorization_bangla,
+        payment_schedule,
+        downloadableUrl,
+        intro_description,
+        intro_explore_fb,
+        intro_explore_website,
+        intro_explore_linkedin,
+        intro_office_address,
+        intro_owners_description,
+        intro_value_proposition,
+        contract_durationOfInvestment_description,
+        contract_projected_roi_description,
+        contract_conditions,
+        shariah_underlying_contracts_description,
+        shariah_approval_from_scholars_description,
+        risks_business_assessment,
+        risks_possession_of_assets,
+        risks_repayment_delay,
+        risks_security,
+        disclaimer,
+        showing_related_updates,
+        slug
     } = await request.json();
     if (await checkPermission(request, requiredPermission)) {
         try {
@@ -48,10 +99,10 @@ export const POST = async (request: NextRequest) => {
                 });
             }
             let slugified;
-            if(!slug){
+            if (!slug) {
                 slugified = slugify(title);
             }
-            if(slug){
+            if (slug) {
                 slugified = slug;
             }
 
@@ -106,10 +157,6 @@ export const POST = async (request: NextRequest) => {
                     disclaimer,
                     showing_related_updates,
                     slug: slugified
-
-
-
-
                 }
             });
             return NextResponse.json({
@@ -128,14 +175,58 @@ export const PATCH = async (request: NextRequest) => {
     const requiredPermission = 'projects';
     if (await checkPermission(request, requiredPermission)) {
         try {
-            const { id, active, type_id, user_id, title, description, repayment_type, fixed_percent, image_1, image_2, image_3, location, duration, 
-                investment_goal, min_investment, projected_roi, commission, profit, risk_grade, repayment, project_duration, raised, being_processed, 
-                start_date_to_invest, last_date_to_invest, overview, deed, letter_of_authorization, letter_of_authorization_bangla, payment_schedule, 
-                downloadableUrl, intro_description,intro_explore_fb, intro_explore_website, intro_explore_linkedin, intro_office_address,intro_owners_description, intro_value_proposition,
-                contract_durationOfInvestment_description, contract_projected_roi_description, contract_conditions,shariah_underlying_contracts_description,
-                shariah_approval_from_scholars_description,risks_business_assessment,risks_possession_of_assets,risks_repayment_delay,risks_security,
-                disclaimer,showing_related_updates,slug,
-                } = await request.json();
+            const {
+                id,
+                active,
+                type_id,
+                user_id,
+                title,
+                description,
+                repayment_type,
+                fixed_percent,
+                image_1,
+                image_2,
+                image_3,
+                location,
+                duration,
+                investment_goal,
+                min_investment,
+                projected_roi,
+                commission,
+                profit,
+                risk_grade,
+                repayment,
+                project_duration,
+                raised,
+                being_processed,
+                start_date_to_invest,
+                last_date_to_invest,
+                overview,
+                deed,
+                letter_of_authorization,
+                letter_of_authorization_bangla,
+                payment_schedule,
+                downloadableUrl,
+                intro_description,
+                intro_explore_fb,
+                intro_explore_website,
+                intro_explore_linkedin,
+                intro_office_address,
+                intro_owners_description,
+                intro_value_proposition,
+                contract_durationOfInvestment_description,
+                contract_projected_roi_description,
+                contract_conditions,
+                shariah_underlying_contracts_description,
+                shariah_approval_from_scholars_description,
+                risks_business_assessment,
+                risks_possession_of_assets,
+                risks_repayment_delay,
+                risks_security,
+                disclaimer,
+                showing_related_updates,
+                slug
+            } = await request.json();
 
             await prisma.projects.update({
                 where: {
@@ -190,7 +281,7 @@ export const PATCH = async (request: NextRequest) => {
                     risks_security,
                     disclaimer,
                     showing_related_updates,
-                    slug,
+                    slug
                 }
             });
             return NextResponse.json({

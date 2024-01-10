@@ -147,7 +147,7 @@ model Projects {
   active                                     String //active, finished, running
   title                                      String    @unique
   description                                String?
-  repayment_type                             String? //fixed, not_fixed
+  repayment_type                             String //fixed, not_fixed
   fixed_percent                              String?
   image_1                                    String?
   image_2                                    String?
@@ -156,9 +156,9 @@ model Projects {
   duration                                   String?
   start_date_to_invest                       String?
   last_date_to_invest                        String?
-  investment_goal                            String?
-  min_investment                             String?
-  projected_roi                              String?
+  investment_goal                            Float
+  min_investment                             String
+  projected_roi                              String
   risk_grade                                 String?
   repayment                                  String?
   raised                                     String?
@@ -207,7 +207,7 @@ model Invests {
   user             Users    @relation(fields: [user_id], references: [id])
   project_id       Int
   project          Projects @relation(fields: [project_id], references: [id])
-  amount           String
+  amount           Float
   phone_no         String?
   transaction_no   String?
   payment_method   String
@@ -221,7 +221,7 @@ model Invests {
   approval_no      String?
   comments         String?  @db.Text()
   investor_comment String?  @db.Text()
-  admin_commnet    String?  @db.Text()
+  admin_comment    String?  @db.Text()
 
   field_4    String?
   field_5    String?

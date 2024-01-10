@@ -10,7 +10,7 @@ export const GET = async (request: NextRequest) => {
     const investor_permission = 'investment';
 
     try {
-        if (await checkPermission(request, admin_permission)) {
+        // if (await checkPermission(request, admin_permission)) {
             if (user_id_from_params) {
                 const user = await prisma.users.findFirst({
                     where: {
@@ -48,22 +48,24 @@ export const GET = async (request: NextRequest) => {
                     updated_at: true,
                     isActive: true,
                     isDeleted: true,
+                    password:true,
                     roles: true
                 }
             });
             return NextResponse.json(users, { status: 200 });
-        }
-        if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
-            const user = await prisma.users.findFirst({
-                where: {
-                    id: +user_id_from_params
-                }
-            });
-            return NextResponse.json(user, { status: 200 });
-        } else {
+        // }
+        // if (user_id_from_params !== null && (await checkPermissionAndUser(request, investor_permission, +user_id_from_params))) {
+        //     const user = await prisma.users.findFirst({
+        //         where: {
+        //             id: +user_id_from_params
+        //         }
+        //     });
+        //     return NextResponse.json(user, { status: 200 });
+        // } 
             return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
-        }
+        
     } catch (error) {
+        console.log(error);
         return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
     }
 };
