@@ -13,7 +13,13 @@ const AppMenu = () => {
     const model: AppMenuItem[] = [
         {
             label: 'Home',
-            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+            items: [
+                { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
+                { label: 'Permissions', icon: 'pi pi-fw pi-id-card', to: '/permissions' },
+                { label: 'Roles', icon: 'pi pi-fw pi-id-card', to: '/roles' },
+                { label: 'Users', icon: 'pi pi-fw pi-id-card', to: '/users' },
+                { label: 'Profiles', icon: 'pi pi-fw pi-id-card', to: '/profiles' }
+            ]
         },
         {
             label: 'MANAGE',
@@ -26,8 +32,6 @@ const AppMenu = () => {
                 { label: 'Blogs', icon: 'pi pi-fw pi-id-card', to: '/blogs' },
                 { label: 'Sub Blogs', icon: 'pi pi-fw pi-id-card', to: '/sub-blogs' },
                 { label: 'Orders', icon: 'pi pi-fw pi-id-card', to: '/orders' },
-                { label: 'Profile', icon: 'pi pi-fw pi-id-card', to: '/profile' },
-                { label: 'Users', icon: 'pi pi-fw pi-id-card', to: '/users' },
                 { label: 'Coupons', icon: 'pi pi-fw pi-id-card', to: '/coupons' },
                 { label: 'Delivery Costs', icon: 'pi pi-fw pi-id-card', to: '/delivery-costs' }
             ]
