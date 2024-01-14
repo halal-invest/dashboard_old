@@ -208,10 +208,10 @@ model Invests {
   project_id       Int
   project          Projects @relation(fields: [project_id], references: [id])
   amount           Float
-  phone_no         String?
+  phone_no         Int?
   transaction_no   String?
   payment_method   String
-  payment_date     String
+  payment_date     DateTime
   image_1          String?
   image_2          String?
   approved         String

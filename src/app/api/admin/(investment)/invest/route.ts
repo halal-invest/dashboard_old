@@ -4,7 +4,7 @@ import { checkPermission } from '@/utils/checkPermissions';
 import { checkPermissionAndUser } from '@/utils/checkPermissionAndUser';
 import { ADMIN_PERMISSION, INVESTOR_PERMISSION } from '@/utils/permissions';
 
-import { string, number, object, ref } from 'yup';
+import { string, number, object, ref, date } from 'yup';
 import sanitize from 'sanitize-html';
 import { getUserEmail } from '@/utils/common_functions';
 import { sendEmailWithNodemailer } from '@/utils/emails';
@@ -13,12 +13,13 @@ const schema = object().shape({
     project_id: number().required(),
     amount: string().required(),
     payment_method: string().required(),
-    payment_date: string().required()
+    payment_date: date().required()
 });
 export const GET = async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const invest_status = searchParams.get('status');
     const user_id_from_params = searchParams.get('userId');
+    // console.log(invest_status, user_id_from_params);
     try {
         if (await checkPermission(request, ADMIN_PERMISSION)) {
             if (invest_status !== null && user_id_from_params === null) {
@@ -46,7 +47,7 @@ export const GET = async (request: NextRequest) => {
                 });
                 return NextResponse.json(invests, { status: 200 });
             }
-            if (invest_status !== null && user_id_from_params !== null) {
+            if (invest_status === null && user_id_from_params === null) {
                 const invests = await prisma.invests.findMany({});
                 return NextResponse.json(invests, { status: 200 });
             }
@@ -73,6 +74,7 @@ export const GET = async (request: NextRequest) => {
 
         return NextResponse.json({ message: 'You are not allowed to perform this action.', status: false });
     } catch (error) {
+        console.log(error);
         return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
     }
 };
